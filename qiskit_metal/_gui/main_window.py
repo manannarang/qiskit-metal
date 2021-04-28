@@ -196,6 +196,11 @@ class QMainWindowExtension(QMainWindowExtensionBase):
 
         self.gui.ui.dockLibrary_tree_view.set_dev_mode(ison)
         self.gui.is_dev_mode = ison
+        # import rebuild
+        # rebuild.activate_developer_mode(RebuildAction, RebuildFunction, QLibraryTree)
+        # else:
+        #  deactivateDeveMode()
+
 
 
 class MetalGUI(QMainWindowBaseHandler):

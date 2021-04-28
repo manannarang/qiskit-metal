@@ -116,7 +116,7 @@ class TransmonPocket6(BaseQubit):
         inductor_width='20um',
         pad_width='455um',
         pad_height='90um',
-        pocket_width='650um',
+        pocket_width='680um',
         pocket_height='650um',
         # 90 has dipole aligned along the +X axis,
         # while 0 has dipole aligned along the +Y axis
@@ -132,7 +132,7 @@ class TransmonPocket6(BaseQubit):
             # : cpw_extend: how far into the ground to extend the CPW line from the coupling pads
             cpw_extend='100um',
             pocket_extent='5um',
-            pocket_rise='0um',
+            pocket_rise='40um',
             loc_W='+1',  # width location  only +-1 or 0
         ))
     """Default drawing options"""

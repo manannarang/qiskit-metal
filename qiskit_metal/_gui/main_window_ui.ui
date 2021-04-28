@@ -329,7 +329,6 @@
    </attribute>
    <addaction name="actionViewDummyLabel"/>
    <addaction name="actionDesign"/>
-   <addaction name="actionNewComponent"/>
    <addaction name="actionVariables"/>
    <addaction name="separator"/>
    <addaction name="actionConnectors"/>

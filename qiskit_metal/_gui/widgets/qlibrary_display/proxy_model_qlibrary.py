@@ -50,7 +50,7 @@ class LibraryFileProxyModel(QSortFilterProxyModel):
         """
         self.is_dev_mode = ison
 
-    def filterAcceptsColumn(self, source_column: int) -> bool:  #pylint: disable=unused-argument
+    def filterAcceptsColumn(self, source_column:int, source_parent:QModelIndex) -> bool: #pylint: disable=unused-argument
         """
         Filters out unwanted file information in display
         Args:
