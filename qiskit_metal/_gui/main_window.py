@@ -23,7 +23,7 @@ from PySide2.QtCore import QTimer, Qt
 from PySide2.QtWidgets import (QDockWidget, QFileDialog, QLabel, QMainWindow,
                                QMessageBox)
 
-from qiskit_metal._gui.widgets.qlibrary_display.delegate_qlibrary import LibraryDelegate
+from qiskit_metal._gui.widgets.developer_mode.dev_mode_tree_delegate_qlibrary import LibraryDelegate
 from qiskit_metal._gui.widgets.qlibrary_display.file_model_qlibrary import QFileSystemLibraryModel
 from qiskit_metal._gui.widgets.qlibrary_display.proxy_model_qlibrary import LibraryFileProxyModel
 from .elements_window import ElementsWindow

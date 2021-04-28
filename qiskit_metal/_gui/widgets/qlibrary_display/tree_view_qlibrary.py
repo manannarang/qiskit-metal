@@ -28,7 +28,6 @@ class TreeViewQLibrary(QTreeView):
     This class extend the `QTreeView`
     """
 
-    qlibrary_rebuild_signal = Signal(str)
     qlibrary_filepath_signal = Signal(str)
 
     def __init__(self, parent: QWidget):
@@ -38,18 +37,6 @@ class TreeViewQLibrary(QTreeView):
             parent (QtWidgets.QWidget): parent widget
         """
         QTreeView.__init__(self, parent)
-        self.is_dev_mode = False  # Whether MetalGUI is in developer mode
-
-    def set_dev_mode(self, ison: bool):
-        """Sets dev mode for self, model, model's source model, and delegate
-
-        Args:
-            ison (bool): Whether to set dev mode
-        """
-        self.is_dev_mode = ison
-        self.itemDelegate().is_dev_mode = ison
-        self.model().set_dev_mode(ison)
-        self.model().sourceModel().set_file_is_dev_mode(ison)
 
     def setModel(self, model: QtCore.QAbstractItemModel):
         """Overriding setModel to hook up clean/dirty file signals to model before setting Model
@@ -66,11 +53,6 @@ class TreeViewQLibrary(QTreeView):
                 f"Invalid model. Expected type {LibraryFileProxyModel} but got type {type(model)}"
             )
 
-        source_model = model.sourceModel()
-        self.qlibrary_rebuild_signal.connect(source_model.clean_file)
-
-        source_model.file_dirtied_signal.connect(self.update)
-        source_model.file_cleaned_signal.connect(self.update)
         super().setModel(model)
 
     def mousePressEvent(self, event: QtGui.QMouseEvent):
@@ -93,11 +75,7 @@ class TreeViewQLibrary(QTreeView):
         source_model = self.model().sourceModel()
         full_path = source_model.filePath(model.mapToSource(index))
 
-        if self.is_dev_mode and index.column() == source_model.REBUILD:
-            qis_abs_path = full_path[full_path.index(__name__.split('.')[0]):]
-            self.qlibrary_rebuild_signal.emit(qis_abs_path)
-
-        elif index.column() == source_model.FILENAME:
+        if index.column() == source_model.FILENAME:
             if not source_model.isDir(model.mapToSource(index)):
                 qis_abs_path = full_path[full_path.
                                          index(__name__.split('.')[0]):]
