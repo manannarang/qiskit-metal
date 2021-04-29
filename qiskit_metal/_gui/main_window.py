@@ -195,7 +195,6 @@ class QMainWindowExtension(QMainWindowExtensionBase):
             )
 
         self.gui.ui.dockLibrary_tree_view.set_dev_mode(ison)
-        self.gui.is_dev_mode = ison
         # import rebuild
         # rebuild.activate_developer_mode(RebuildAction, RebuildFunction, QLibraryTree)
         # else:
@@ -252,7 +251,6 @@ class MetalGUI(QMainWindowBaseHandler):
         self.variables_window = PropertyTableWidget(self, gui=self)
 
         self.build_log_window = None
-        self.is_dev_mode = False
 
         self._setup_component_widget()
         self._setup_plot_widget()
@@ -475,19 +473,6 @@ class MetalGUI(QMainWindowBaseHandler):
             self.logger.error(
                 f"Unable to open param entry window due to Exception: {e} ")
 
-    def _refresh_component_build(self, qis_abs_path):
-        """Reresh build for a component along a given path.
-
-        Args:
-            qis_abs_path (str): Absolute component path.
-        """
-        self.design.reload_and_rebuild_components(qis_abs_path)
-        # Table models
-        self.ui.tableComponents.model().refresh()
-
-        # Redraw plots
-        self.refresh_plot()
-        self.autoscale()
 
     def _setup_library_widget(self):
         """
@@ -519,13 +504,8 @@ class MetalGUI(QMainWindowBaseHandler):
                 self.ui.dockLibrary.library_model.index(
                     self.ui.dockLibrary.library_model.rootPath())))
 
-        self.ui.dockLibrary_tree_view.setItemDelegate(
-            LibraryDelegate(self.main_window))  # try empty one if no work
-
         self.ui.dockLibrary_tree_view.qlibrary_filepath_signal.connect(
             self._create_new_component_object_from_qlibrary)
-        self.ui.dockLibrary_tree_view.qlibrary_rebuild_signal.connect(
-            self._refresh_component_build)
 
     ################################################
     # UI
@@ -580,27 +560,11 @@ class MetalGUI(QMainWindowBaseHandler):
         """
         Rebuild all components in the design from scratch and refresh the gui.
         """
-        if self.is_dev_mode:
-            self.refresh_everything()
 
         self.design.rebuild()
         self.refresh()
         if autoscale:
             self.autoscale()
-
-    def refresh_everything(self):
-        """Refresh everything."""
-
-        df = self.ui.dockLibrary.library_model.dirtied_files
-        values = {list(df[k])[0] for k in df.keys()}
-
-        for file in values:  # dirtied_files size changes during clean_file
-            if '.py' in file:
-                file = file[file.index('qiskit_metal'):]
-                self.design.reload_and_rebuild_components(file)
-                self.ui.dockLibrary.library_model.clean_file(file)
-        self.refresh()
-        self.autoscale()
 
     def refresh(self):
         """Refreshes everything. Overkill in general.
