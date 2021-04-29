@@ -22,20 +22,27 @@
 """Qiskit Metal unit tests analyses functionality."""
 
 from PySide2 import QtTest
-import PySide2
 from PySide2.QtCore import QObject
+import unittest
 import os , shutil
 from qiskit_metal._gui.widgets.developer_mode.qlibrary_file_watcher_holder import QLibraryFileWatcherHolder
 from qiskit_metal.tests.test_data import test_dir
+from qiskit_metal import designs, MetalGUI
 
 
 
-class TestQt(PySide2.QtTest.QTest):
 
+class TestQt(QObject):
+
+
+
+class TestDevModeQLibraryFileWatcher(unittest.TestCase):
     """Unit test class."""
 
     @classmethod
     def initTestCase(cls) -> None:
+        cls.design = designs.DesignPlanar()
+        cls.gui = MetalGUI(cls.design)
         print(test_dir.__file__)
         init_test_dir_abs_path = os.path.abspath(test_dir.__file__)
         test_dir_abs_path = init_test_dir_abs_path.split('__init__.py')[0]
@@ -54,7 +61,7 @@ class TestQt(PySide2.QtTest.QTest):
         self.fw_holder = QLibraryFileWatcherHolder(self.TEST_DIR_ROOT)
         # getting absolute path of QLibrary folder
 
-    # def cleanupTestCase(self):
+    # def tearDown(self):
     #     """Tie any loose ends."""
     #     self.clean_test_directory()
 
@@ -106,7 +113,5 @@ class TestQt(PySide2.QtTest.QTest):
 
 
 if __name__ == '__main__':
+    unittest.main(verbosity=2)
     print("I don't wanna let your drama bring me down. Maybe at the end of the weekend? ;) ")
-    tr = TestQt()
-    print(tr.__dict__)
-
