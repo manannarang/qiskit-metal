@@ -45,6 +45,31 @@ class QMainWindowExtensionBase(QMainWindow):
         super().__init__()
         # Set manually
         self.handler = None  # type: QMainWindowBaseHandler
+        self._force_close = False # for testing purposes this allows us to close the window from script
+
+
+    @property
+    def force_close(self):
+        """
+        For testing purposes, force_close=True allows the Window to be closed from a script
+        WITHOUT SAVING and without clicking "ok"
+
+        Returns: force_close
+
+        """
+        return self._force_close
+
+
+    @force_close.setter
+    def force_close(self, ison):
+        """
+
+        Args:
+            ison (bool): Whether to force close
+
+        """
+        self._force_close = ison
+
 
     @property
     def logger(self) -> logging.Logger:
@@ -84,6 +109,10 @@ class QMainWindowExtensionBase(QMainWindow):
 
         Passed an event which we can choose to accept or reject.
         """
+        if self._force_close:
+            super().closeEvent(event)
+            return
+
         if self.ok_to_continue():
             self.save_window_settings()
             super().closeEvent(event)

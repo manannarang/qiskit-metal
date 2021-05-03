@@ -1,19 +1,15 @@
 import os
-import typing
 
-from PySide2.QtGui import QFont
-from PySide2.QtCore import QFileSystemWatcher, Qt, Signal, QModelIndex
-from PySide2.QtWidgets import QFileSystemModel, QWidget
+from PySide2.QtCore import QFileSystemWatcher, Signal
+from PySide2.QtWidgets import QWidget
 
 
-
-
-class QLibraryFileWatcherHolder(QWidget):
+class QLibraryFileWatcher(QFileSystemWatcher):
 
     file_dirtied_signal = Signal()
     file_cleaned_signal = Signal()
 
-    def __init__(self, qlibrary_path: str, parent:QWidget = None):
+    def __init__(self, qlibrary_path: str, parent: QWidget = None):
         """
         Initializes Model
 
@@ -21,13 +17,15 @@ class QLibraryFileWatcherHolder(QWidget):
             parent: Parent widget
         """
         super().__init__(parent)
-        self.file_system_watcher = QFileSystemWatcher()
-        self.dirtied_files = {}
+        self.dirtied_files = dict()
         self.ignored_substrings = {'.cpython', '__pycache__', '__init__'}
         self.qlibrary_path = qlibrary_path
-        self.__set_root_path(self.qlibrary_path)
+        self.hasanythingeverbeendirty = False
+        self._set_root_path(self.qlibrary_path)
 
-    def __set_root_path(self, path: str):
+
+
+    def _set_root_path(self, path: str):
         """
         Sets FileWatcher on root path
         Args:
@@ -37,24 +35,41 @@ class QLibraryFileWatcherHolder(QWidget):
         for root, _, files in os.walk(path):
             # do NOT use directory changed -- fails for some reason
             for name in files:
-                self.file_system_watcher.addPath(os.path.join(root, name))
+                if self.is_trackable_file(name):
+                    self.addPath(os.path.join(root, name))
 
-        self.file_system_watcher.fileChanged.connect(self.set_file_dirty)
+        print(
+            f"Successfully connected: {self.fileChanged.connect(self.set_file_dirty)}"
+        )
+        print(
+            f"Successfully connected: {self.directoryChanged.connect(self.set_file_dirty)}"
+        )
 
+
+        with open(
+                os.path.join(self.qlibrary_path,
+                             "The 1975"), 'w') as f:
+            f.write("rip")
+            f.flush()
+            os.fsync(f.fileno())
+        import time
+        time.sleep(2)
+        print(f"creatied: {self.hasanythingeverbeendirty}")
 
 
     def set_file_dirty(self, filepath: str):
+        self.hasanythingeverbeendirty = True
         """
         Dirties file and re-adds edited file to the FileWatcher
         Emits file_dirtied_signal
         Args:
             filepath: Dirty file
-            
+
         """
-        # ensure get only filename
-        if filepath not in self.file_system_watcher.files():
+        print("dirtying")
+        if filepath not in self.files():
             if os.path.exists(filepath):
-                self.file_system_watcher.addPath(filepath)
+                self.addPath(filepath)
         filename = self.filepath_to_filename(filepath)
         if not self.is_trackable_file(filename):
             return
@@ -72,7 +87,6 @@ class QLibraryFileWatcherHolder(QWidget):
 
         self.file_dirtied_signal.emit()
 
-
     def is_file_dirty(self, filepath: str) -> bool:
         """
         Checks whether file is dirty
@@ -84,7 +98,6 @@ class QLibraryFileWatcherHolder(QWidget):
         """
         filename = self.filepath_to_filename(filepath)
         return filename in self.dirtied_files
-
 
     def filepath_to_filename(self, filepath: str) -> str:  # pylint: disable=R0201, no-self-use
         """
@@ -103,10 +116,9 @@ class QLibraryFileWatcherHolder(QWidget):
             return filename[:-len('.py')]
         return filename
 
-
     def clean_file(self, filepath: str):
         """
-        Remove file from the dirtied_files dictionary
+        Remove file from the _dirtied_files dictionary
         and remove any parent files who are only dirty due to
         this file. Emits file_cleaned_signal.
         Args:
@@ -126,10 +138,9 @@ class QLibraryFileWatcherHolder(QWidget):
                 if len(self.dirtied_files[file]) < 1:
                     self.dirtied_files.pop(file)
         self.file_cleaned_signal.emit()
-        
-        
+
     def clean_all_files(self):
-        self.dirtied_files = {} 
+        self.dirtied_files = {}
 
     def is_trackable_file(self, file: str):
         """
