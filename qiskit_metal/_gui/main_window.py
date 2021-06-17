@@ -19,7 +19,7 @@ import os
 from pathlib import Path
 from typing import List, TYPE_CHECKING
 
-from PySide2.QtCore import QTimer, Qt, QSize
+from PySide2.QtCore import QTimer, Qt
 from PySide2.QtWidgets import (QDockWidget, QFileDialog, QLabel, QMainWindow,
                                QMessageBox)
 from PySide2.QtGui import QIcon, QPixmap
@@ -197,8 +197,10 @@ class QMainWindowExtension(QMainWindowExtensionBase):
         if ison:
             QMessageBox.warning(
                 self, "Notice",
-                "If you're editing a component via an external IDE, don't forget to refresh the component's file in the Library before rebuilding so your changes will take effect."
-            )
+                "If you're editing a component via an external IDE,"
+                " don't forget to refresh the component's file"
+                " in the Library before rebuilding so your changes"
+                " will take effect.")
 
         self.gui.ui.dockLibrary_tree_view.set_dev_mode(ison)
         self.gui.is_dev_mode = ison
@@ -300,7 +302,7 @@ class MetalGUI(QMainWindowBaseHandler):
     def _set_enabled_design_widgets(self, enabled: bool = True):
         """Make rebuild and all the other main button disabled.
 
-        Arguments:
+        Args:
             enabled (bool): True to enable, False to disable the design widgets.  Defaults to True.
         """
 
@@ -398,6 +400,9 @@ class MetalGUI(QMainWindowBaseHandler):
         self.ui.dockLog.parent().resizeDocks([self.ui.dockLog], [120],
                                              Qt.Vertical)
 
+        # toolBarView additions
+        self._add_additional_qactions_tool_bar_view()
+
         # Tab positions
         self.ui.tabWidget.setCurrentIndex(0)
 
@@ -406,6 +411,51 @@ class MetalGUI(QMainWindowBaseHandler):
         and main ui is loaded."""
         if self.component_window:
             self.component_window.setCurrentIndex(0)
+
+    def _add_additional_qactions_tool_bar_view(self):
+        """Add QActions to toolBarView that cannot be added via QDesign"""
+
+        # Library
+        self.dock_library_qaction = self.ui.dockLibrary.toggleViewAction()
+        library_icon = QIcon()
+        library_icon.addPixmap(QPixmap(":/component"), QIcon.Normal, QIcon.Off)
+        self.dock_library_qaction.setIcon(library_icon)
+        self.ui.toolBarView.insertAction(self.ui.actionToggleDocks,
+                                         self.dock_library_qaction)
+
+        # Design
+        self.dock_design_qaction = self.ui.dockDesign.toggleViewAction()
+        design_icon = QIcon()
+        design_icon.addPixmap(QPixmap(":/design"), QIcon.Normal, QIcon.Off)
+        self.dock_design_qaction.setIcon(design_icon)
+        self.ui.toolBarView.insertAction(self.ui.actionToggleDocks,
+                                         self.dock_design_qaction)
+
+        # Variables
+        self.dock_variables_qaction = self.ui.dockVariables.toggleViewAction()
+        variables_icon = QIcon()
+        variables_icon.addPixmap(QPixmap(":/variables"), QIcon.Normal,
+                                 QIcon.Off)
+        self.dock_variables_qaction.setIcon(variables_icon)
+        self.ui.toolBarView.insertAction(self.ui.actionToggleDocks,
+                                         self.dock_variables_qaction)
+
+        # Connectors
+        self.dock_connectors_qaction = self.ui.dockConnectors.toggleViewAction()
+        connectors_icon = QIcon()
+        connectors_icon.addPixmap(QPixmap(":/connectors"), QIcon.Normal,
+                                  QIcon.Off)
+        self.dock_connectors_qaction.setIcon(connectors_icon)
+        self.ui.toolBarView.insertAction(self.ui.actionToggleDocks,
+                                         self.dock_connectors_qaction)
+
+        # Log
+        self.dock_log_qaction = self.ui.dockLog.toggleViewAction()
+        log_icon = QIcon()
+        log_icon.addPixmap(QPixmap(":/log"), QIcon.Normal, QIcon.Off)
+        self.dock_log_qaction.setIcon(log_icon)
+        self.ui.toolBarView.insertAction(self.ui.actionToggleDocks,
+                                         self.dock_log_qaction)
 
     def _set_element_tab(self, yesno: bool):
         """Set the elements tabl to Elements or View.
@@ -426,6 +476,12 @@ class MetalGUI(QMainWindowBaseHandler):
     def _setup_variables_widget(self):
         """Setup the variables widget."""
         self.ui.dockVariables.setWidget(self.variables_window)
+        # hookup to delete action
+        self.ui.btn_comp_del.clicked.connect(
+            self.ui.tableComponents.delete_selected_rows)
+        self.ui.btn_comp_rename.clicked.connect(
+            self.ui.tableComponents.rename_row)
+        self.ui.btn_comp_zoom.clicked.connect(self.btn_comp_zoom_fx)
 
     def _setup_plot_widget(self):
         """Create main Window Widget Plot."""
@@ -535,6 +591,8 @@ class MetalGUI(QMainWindowBaseHandler):
 
         self.ui.dockLibrary_tree_view.setItemDelegate(
             LibraryDelegate(self.main_window))  # try empty one if no work
+        self.ui.dockLibrary_tree_view.itemDelegate().tool_tip_signal.connect(
+            self.ui.dockLibrary_tree_view.setToolTip)
 
         self.ui.dockLibrary_tree_view.qlibrary_filepath_signal.connect(
             self._create_new_component_object_from_qlibrary)
@@ -542,6 +600,9 @@ class MetalGUI(QMainWindowBaseHandler):
             self._refresh_component_build)
         self.ui.dockLibrary_tree_view.qlibrary_file_dirtied_signal.connect(
             self._set_rebuild_needed)
+
+        self.ui.dockLibrary_tree_view.viewport().setAttribute(Qt.WA_Hover, True)
+        self.ui.dockLibrary_tree_view.viewport().setMouseTracking(True)
 
     ################################################
     # UI
@@ -672,7 +733,7 @@ class MetalGUI(QMainWindowBaseHandler):
     def edit_component(self, name: str):
         """Set the component to be examined by the component widget.
 
-        Arguments:
+        Args:
             name (str): Name of component to exmaine.
         """
         if self.component_window:
@@ -694,6 +755,13 @@ class MetalGUI(QMainWindowBaseHandler):
         """
         bounds = self.canvas.find_component_bounds(components)
         self.canvas.zoom_to_rectangle(bounds)
+
+    def btn_comp_zoom_fx(self):
+        """
+        Zooms in display on selected QComponent
+        """
+        names = self.ui.tableComponents.name_of_selected_qcomponent()
+        self.zoom_on_components(names)
 
     @slot_catch_error()
     def gui_create_build_log_window(self, _=None):
