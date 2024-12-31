@@ -73,11 +73,11 @@ To do so, first navigate to the folder created by the clone. For example:
 
     cd qiskit-metal
 
-Once you are in the folder that contains the `environemnt.yml` file, execute the following installation commands:
+Once you are in the folder that contains the `environment.yml` file, execute the following installation commands:
 
 ::
 
-    conda env create -n <env_name> environment.yml
+    conda env create -n <env_name> -f environment.yml
     conda activate <env_name>
     python -m pip install --no-deps -e .
 
@@ -184,6 +184,17 @@ Here are some things to consider when setting up a development environment:
 * Add the path of your qiskit-metal folder to your PATH
 
 * Library errors when activating conda environments, or initializing jupyter notebook/lab, indicate a conflict between python libraries in the base and sub environments. Go ahead and manually delete the library from the base environment `site-packages` folder, shows in the error message. You might need to reinstall them in the sub environment, or create a new one.
+
+--------------------------
+Setting up precommit hooks
+--------------------------
+
+If are planning on committing, you can run the following in the root of your project to link the available precommit hooks.
+::
+
+    ./hook_setup
+
+Please make sure the command is run from the same shell you plan on using to commit. If running on Windows, please make sure that this script is run from git-bash or another Linux-style shell. Currently, the precommit hook will check for yapf formatting.
 
 =============
 Common Issues

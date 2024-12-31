@@ -59,14 +59,14 @@ nbsphinx_prolog = """
 {% set docname = docname|replace("F.Small-quantum-chips", "F.Small-quantum-chips/") %}
 {% set docname = docname|replace("full-design-flow-examples", "full-design-flow-examples/") %}
 {% set docname = docname|replace("tut", "tut/") %}
-{% set docname = docname|replace("1-Overview", "1 Overview/") %}
+{% set docname = docname|replace("1-Overview", "1-Overview/") %}
 {% set docname = docname|replace("2-From-components-to-chip", "2-From-components-to-chip/") %}
 {% set docname = docname|replace("3-Renderers", "3-Renderers/") %}
 {% set docname = docname|replace("4-Analysis", "4-Analysis/") %}
 {% set docname = docname|replace("quick-topics", "quick-topics/") %}
 
 .. only:: html
-    
+
     .. role:: raw-html(raw)
         :format: html
 
@@ -83,7 +83,7 @@ nbsphinx_prolog = """
 nbsphinx_epilog = """
 {% set docname = env.doc2path(env.docname, base=None) %}
 .. only:: html
-    
+
     .. role:: raw-html(raw)
         :format: html
 
@@ -126,22 +126,15 @@ copyright = '2019, Qiskit Development Team'  # pylint: disable=redefined-builtin
 author = 'Qiskit Metal Development Team'
 # -- General configuration ---------------------------------------------------
 
-# If your documentation needs a minimal Sphinx version, state it here.
-#
-# needs_sphinx = '1.0'
-
-# Add any Sphinx extension module names here, as strings. They can be
-# extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
-# ones.
 extensions = [
     'sphinx.ext.napoleon', 'sphinx.ext.autodoc', 'sphinx.ext.autosummary',
     'sphinx.ext.mathjax', 'sphinx.ext.viewcode', 'sphinx.ext.extlinks',
-    'jupyter_sphinx', 'nbsphinx'
+    "nbsphinx",
+    "qiskit_sphinx_theme",
 ]
 
 html_static_path = ['_static']
 templates_path = ['_templates']
-html_css_files = ['style.css', 'custom.css', 'gallery.css']
 
 exclude_patterns = [
     '_build', 'build', '*.ipynb', '**.ipynb_checkpoints', '_utility'
@@ -221,21 +214,7 @@ modindex_common_prefix = ['qiskit_metal.']
 
 # -- Options for HTML output -------------------------------------------------
 
-# The theme to use for HTML and HTML Help pages.  See the documentation for
-# a list of builtin themes.
-#
-html_theme = "qiskit_sphinx_theme"
-html_theme_path = ['.', qiskit_sphinx_theme.get_html_theme_path()]
+html_theme = "qiskit-ecosystem"
+html_title = f"{project} {release}"
 
-html_logo = 'images/logo.png'
-#html_sidebars = {'**': ['globaltoc.html']}
 html_last_updated_fmt = '%Y/%m/%d'
-
-html_theme_options = {
-    'logo_only': False,
-    'display_version': True,
-    'prev_next_buttons_location': 'bottom',
-    'style_external_links': True,
-    'collapse_navigation': True,
-    'sticky_navigation': True,
-}

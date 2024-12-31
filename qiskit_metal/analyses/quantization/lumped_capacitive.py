@@ -32,6 +32,7 @@ import scipy.optimize as opt
 from pint import UnitRegistry
 
 from pyEPR.calcs.convert import Convert
+from .constants import (e, h, hbar, phinot, phi0)
 
 __all__ = [
     'Ic_from_Lj', 'Ic_from_Ej', 'Cs_from_Ec', 'transmon_props', 'chi',
@@ -41,15 +42,6 @@ __all__ = [
     'df_cmat_style_print', 'move_index_to', 'df_reorder_matrix_basis',
     'lumped_oscillator_from_path'
 ]
-
-# define constants
-e = 1.60217657e-19  # electron charge
-h = 6.62606957e-34  # Plank's
-hbar = 1.0545718E-34  # Plank's reduced
-phinot = 2.067 * 1E-15  # magnetic flux quantum
-phi0 = phinot / (2 * np.pi)  # reduced magnetic flux quantum
-
-# TODO: Move to a more generic file
 
 
 def Ic_from_Lj(Lj: float) -> float:
@@ -109,7 +101,7 @@ def transmon_props(Ic: float, Cq: float):
     wq = 1 / np.sqrt(LJ * Cq) - EC
 
     # charge dispersion
-    eps1 = EC * 2**9 * (2/np.sqrt(np.pi)) * \
+    eps1 = EC * 2**9 * (np.sqrt(2/np.pi)) * \
         (EJ/2/EC)**(1.25) * np.exp(-np.sqrt(8*EJ/EC))
 
     return LJ, EJ, Zqp, EC, wq, wq0, eps1
@@ -271,8 +263,12 @@ def extract_transmon_coupled_Noscillator(capMatrix,
 
     # sum of capacitances from each pad to ground
     # this assumes the bus couplers are at "ground"
-    C1S = Cg[0] + np.sum(Cbus[0,])
-    C2S = Cg[1] + np.sum(Cbus[1,])
+    C1S = Cg[0] + np.sum(Cbus[
+        0,
+    ])
+    C2S = Cg[1] + np.sum(Cbus[
+        1,
+    ])
 
     # total capacitance between pads
     tCSq = Cs + C1S * C2S / (C1S + C2S)  # Key equation
@@ -285,7 +281,11 @@ def extract_transmon_coupled_Noscillator(capMatrix,
             (C1S+C2S) + np.sum(Cbus[:, ii]) + np.sum(Cbusbus[ii, :])
 
     # qubit to coupling pad capacitance
-    tCqbus = (C2S * Cbus[0,] - Cbus[1,] * C1S) / (C1S + C2S)
+    tCqbus = (C2S * Cbus[
+        0,
+    ] - Cbus[
+        1,
+    ] * C1S) / (C1S + C2S)
 
     # coupling pad to coupling pad capacitance
     tCqbusbus = np.zeros([N, N])
@@ -295,7 +295,11 @@ def extract_transmon_coupled_Noscillator(capMatrix,
                 (Cbus[0, ii]+Cbus[1, ii])*(Cbus[0, jj]+Cbus[1, jj])/(C1S+C2S)
 
     # voltage division ratio
-    bbus = (C2S * Cbus[0,] - Cbus[1,] * C1S) / ((C1S + C2S) * Cs + C1S * C2S)
+    bbus = (C2S * Cbus[
+        0,
+    ] - Cbus[
+        1,
+    ] * C1S) / ((C1S + C2S) * Cs + C1S * C2S)
 
     # total qubit capacitance (including junction capacitance)
     Cq = tCSq + CJ
@@ -479,18 +483,26 @@ def levels_vs_ng_real_units(Cq, IC, N=301, do_disp=0, do_plots=0):
         plt.figure()
         plt.subplot(1, 2, 1)
         plt.plot(charge,
-                 elvls[0,] / h / 1e9,
+                 elvls[
+                     0,
+                 ] / h / 1e9,
                  'k',
                  charge,
-                 elvls[1,] / h / 1e9,
+                 elvls[
+                     1,
+                 ] / h / 1e9,
                  'b',
                  charge,
-                 elvls[2,] / h / 1e9,
+                 elvls[
+                     2,
+                 ] / h / 1e9,
                  'r',
                  charge,
-                 elvls[3,] / h / 1e9,
+                 elvls[
+                     3,
+                 ] / h / 1e9,
                  'g',
-                 LineWidth=2)
+                 linewidth=2)
         plt.xlabel('Gate charge, n_g [2e]')
         plt.ylabel('Energy, E_n [GHz]')
         plt.subplot(1, 2, 2)
@@ -502,23 +514,43 @@ def levels_vs_ng_real_units(Cq, IC, N=301, do_disp=0, do_plots=0):
         plt.figure(2)
         plt.subplot(1, 2, 1)
         plt.plot(
-            charge, 1000 * (elvls[2,] / h / 1e9 - elvls[0,] / h / 1e9 -
-                            2 * elvls[1,] / h / 1e9 - elvls[0,] / h / 1e9),
-            charge, -charge * 0 - 1000 * Ec / h / 1e9)
+            charge, 1000 * (elvls[
+                2,
+            ] / h / 1e9 - elvls[
+                0,
+            ] / h / 1e9 - 2 * elvls[
+                1,
+            ] / h / 1e9 - elvls[
+                0,
+            ] / h / 1e9), charge, -charge * 0 - 1000 * Ec / h / 1e9)
         plt.xlabel('Gate charge, n_g [2e]')
         plt.ylabel('delta [MHZ] green theory, blue numerics ')
         plt.subplot(1, 2, 2)
-        plt.plot(charge, elvls[1,] / h / 1e9 - elvls[0,] / h / 1e9, charge,
-                 charge * 0 + (np.sqrt(8 * EJ * Ec) - Ec) / h / 1e9)
+        plt.plot(charge, elvls[
+            1,
+        ] / h / 1e9 - elvls[
+            0,
+        ] / h / 1e9, charge, charge * 0 + (np.sqrt(8 * EJ * Ec) - Ec) / h / 1e9)
         plt.xlabel('Gate charge, n_g [2e]')
         plt.ylabel('F01 [GHZ] green theory, blue numerics ')
         plt.show()
 
-    fqubitGHz = np.mean(elvls[1,] / h / 1e9)
-    anharMHz = np.mean(1000 * (elvls[2,] / h / 1e9 - elvls[0,] / h / 1e9 -
-                               2 * elvls[1,] / h / 1e9 - elvls[0,] / h / 1e9))
+    fqubitGHz = np.mean(elvls[
+        1,
+    ] / h / 1e9)
+    anharMHz = np.mean(1000 * (elvls[
+        2,
+    ] / h / 1e9 - elvls[
+        0,
+    ] / h / 1e9 - 2 * elvls[
+        1,
+    ] / h / 1e9 - elvls[
+        0,
+    ] / h / 1e9))
 
-    disp = np.max(-elvls[1,] / h + elvls[1, 0] / h)
+    disp = np.max(-elvls[
+        1,
+    ] / h + elvls[1, 0] / h)
     tphi_ms = 2 / (2 * np.pi * disp * np.pi * 1e-4 * 1e-3)
 
     if do_disp:

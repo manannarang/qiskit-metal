@@ -42,15 +42,14 @@ class TunableCoupler01(BaseQubit):
     .. image::
         TunableCoupler01.png
 
+    .. meta::
+        Tunable Coupler 01
+
     Options:
         Convention: Values (unless noted) are strings with units included,
         (e.g., '30um')
 
     BaseQubit Default Options:
-        * pos_x: '0um' -- Origin of the component (see above figure)
-        * pos_y: '0um' -- Origin of the component (see above figure)
-        * orientation: '0' -- Degree of component rotation
-        * layer: '1' -- layer info, gds and other applications
         * connection_pads: empty Dict -- Currently not used, connection count is static. (WIP)
         * _default_connection_pads: empty Dict -- The default values for the (if any) connection lines of the qubit.
 
@@ -73,11 +72,7 @@ class TunableCoupler01(BaseQubit):
         * _default_connection_pads: Currently empty
     """
 
-    default_options = Dict(pos_x='0um',
-                           pos_y='0um',
-                           orientation='0',
-                           layer='1',
-                           c_width='400um',
+    default_options = Dict(c_width='400um',
                            l_width='20um',
                            l_gap='10um',
                            a_height='60um',
@@ -120,8 +115,8 @@ class TunableCoupler01(BaseQubit):
                                          -((x_spot) * 1 / 5 - p.l_width / 2),
                                          p.a_height)
 
-        left_side = draw.shapely.ops.cascaded_union([btm, arm1, arm2, arm3])
-        cap_island = draw.shapely.ops.cascaded_union([
+        left_side = draw.shapely.ops.unary_union([btm, arm1, arm2, arm3])
+        cap_island = draw.shapely.ops.unary_union([
             left_side,
             draw.shapely.affinity.scale(left_side,
                                         xfact=-1,
@@ -162,8 +157,7 @@ class TunableCoupler01(BaseQubit):
             cpl_y - p.cp_arm_length,
             cpl_x + 1 / 5 * x_spot + p.cp_arm_width / 2, cpl_y)
 
-        con_body = draw.shapely.ops.cascaded_union(
-            [con_pad, con_arm_l, con_arm_r])
+        con_body = draw.shapely.ops.unary_union([con_pad, con_arm_l, con_arm_r])
 
         con_sub = con_body.buffer(p.cp_gap, cap_style=3, join_style=2)
 
@@ -207,7 +201,7 @@ class TunableCoupler01(BaseQubit):
 
         #Add pin
         self.add_pin('Control',
-                     points=np.array(con_pin),
+                     points=np.array(con_pin.coords),
                      width=p.l_width,
                      input_as_norm=True)
         self.add_pin('Flux',

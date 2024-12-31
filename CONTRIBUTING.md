@@ -1,5 +1,5 @@
 # Contributing to Qiskit Metal
-Qiskit Metal follows the overall Qiskit project contributing guidelines. These are all included in the [Qiskit Documentation](https://qiskit.org/documentation/contributing_to_qiskit.html).
+Qiskit Metal follows the overall Qiskit project contributing guidelines. These are all included in the [Qiskit Documentation](https://github.com/Qiskit/qiskit/blob/main/CONTRIBUTING.md).
 
 Please read those general guidelines first, then the specific details for contributing to Metal below.
 
@@ -165,35 +165,13 @@ The actual docstring for the elements listed in the module docstring
 
 
     >  You can use any Sphinx directive or rst formatting in a docstring as it
-    >  makes sense. For example, one common extension used is the ``jupyter-execute``
-    >  directive, which is used to execute a code block in Jupyter and display both
-    >  the code and output. This is particularly useful for visualizations.
+    >  makes sense.
 
 ### Rebuilding Documentation
 
-If you make changes to the codebase and want to rebuild the documentation,
+If you make changes to the codebase and want to rebuild the documentation: `tox -e docs`.
 
-1. Install `sphinx` and `numpydoc`.
-```
-conda install sphinx numpydoc
-(or pip install -U sphinx)
-```
+Sometimes Sphinx can have bad cache state. Run `tox -e docs-clean` to reset Tox.
 
-2. Install [read the docs theme](https://github.com/Qiskit/qiskit_sphinx_theme) and set in the config `html_theme = "qiskit_sphinx_theme"`.
-```
-pip install qiskit_sphinx_theme
-```
-
-3. Install required packages.
-```
-pip install sphinx_automodapi
-pip install jupyter_sphinx
-```
-
-4. Make the docs.  In the `docs` directory,
-```
-make html
-```
-
-You can also use this to update the doc tree.
-
+## Check-list for specific types of Pull Requests
+Please refer to [these instructions](https://github.com/Qiskit/qiskit-metal/blob/main/contributor_guidelines/pull_request_rules.md)

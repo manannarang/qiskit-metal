@@ -16,9 +16,8 @@ from typing import Union, Tuple
 import pandas as pd
 from pyEPR.ansys import ureg
 from qiskit_metal.designs import QDesign  # pylint: disable=unused-import
-
-from ... import Dict
-from ..core import QSimulation
+from qiskit_metal import Dict
+from qiskit_metal.analyses.core import QSimulation
 
 
 class LumpedElementsSim(QSimulation):
@@ -60,36 +59,48 @@ class LumpedElementsSim(QSimulation):
     """Default setup."""
 
     # supported labels for data generated from the simulation
-    data_labels = ['cap_matrix', 'cap_all_passes', 'units']
+    data_labels = ['cap_matrix', 'cap_all_passes', 'units', 'is_converged']
     """Default data labels."""
 
-    def __init__(self, design: 'QDesign', renderer_name: str = 'q3d'):
+    def __init__(self, design: 'QDesign' = None, renderer_name: str = 'q3d'):
         """Initialize the class to extract the capacitance matrix.
 
         Args:
             design (QDesign): Pointer to the main qiskit-metal design.
-                Used to access the QRenderer.
+                Used to access the QRenderer. Defaults to None.
             renderer_name (str, optional): Which renderer to use. Defaults to 'q3d'.
         """
         # set design and renderer
         super().__init__(design, renderer_name)
 
-    def _analyze(self) -> str:
+    def _analyze(self):
         """Executes the analysis step of the Run. First it initializes the renderer setup
         to prepare for the capacitance calculation, then it executes it.
-        Finally it recovers the output of the analysis and stores it in self.capacitance_matrix.
+        Finally it calls _get_results_from_renderer to recovers the simulation output.
         """
         # pylint: disable=attribute-defined-outside-init
         self.sim_setup_name = self.renderer.initialize_cap_extract(**self.setup)
-
         self.renderer.analyze_setup(self.sim_setup_name)
+        self._get_results_from_renderer()
 
-        # extract main (latest) capacitance matrix
-        self.capacitance_matrix, self.units = self.renderer.get_capacitance_matrix(
-        )
-        # extract the capacitance matrices for all passes
-        self.capacitance_all_passes, _ = self.renderer.get_capacitance_all_passes(
-        )
+    def _get_results_from_renderer(self):
+        """Recovers the output of the analysis and stores it in self.capacitance_matrix
+        """
+        if self.renderer_initialized:
+            # pylint: disable=attribute-defined-outside-init
+            # extract main (latest) capacitance matrix
+            self.capacitance_matrix, self.units = self.renderer.get_capacitance_matrix(
+            )
+            # extract the capacitance matrices for all passes
+            self.capacitance_all_passes, _ = self.renderer.get_capacitance_all_passes(
+            )
+            # extract convergence
+            self.is_converged = self.renderer.get_convergence()
+        else:
+            self.logger.error(
+                "Please initialize renderer before trying to load the simulation results."
+                " Consider using the method self.renderer._initiate_renderer()"
+                " if you did not already connect qiskit-metal to the renderer.")
 
     def run_sim(  # pylint: disable=arguments-differ
             self,
@@ -118,7 +129,7 @@ class LumpedElementsSim(QSimulation):
         """
         # save input variables to run(). This line must be the first in the method
         if components is not None:
-            argm = locals()
+            argm = dict(locals())
             del argm['self']
             self.save_run_args(**argm)
         # wipe data from the previous run (if any)
@@ -207,3 +218,26 @@ class LumpedElementsSim(QSimulation):
                 {type(data)})
             return
         self.set_data('units', data)
+
+    @property
+    def is_converged(self) -> bool:
+        """Getter
+
+        Returns:
+            bool: Boolean indicating whether simulation has converged
+        """
+        return self.get_data('is_converged')
+
+    @is_converged.setter
+    def is_converged(self, data: bool):
+        """Setter
+
+        Args:
+            data (bool): Sets convergence of simulation for
+        """
+        if not isinstance(data, bool):
+            self.logger.warning(
+                'Unsupported type %s. Only accepts boolean. Please try again.',
+                {type(data)})
+            return
+        self.set_data('is_converged', data)

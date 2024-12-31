@@ -28,7 +28,7 @@ from qiskit_metal.analyses.quantization import lumped_capacitive
 from qiskit_metal.analyses.hamiltonian.transmon_charge_basis import Hcpb
 from qiskit_metal.analyses.hamiltonian.HO_wavefunctions import wavefunction
 from qiskit_metal.analyses.em import cpw_calculations, kappa_calculation
-from qiskit_metal.analyses.sweep_options.sweeping import Sweeping
+from qiskit_metal.analyses.sweep_and_optimize.sweeper import Sweeper
 from qiskit_metal.tests.assertions import AssertionsMixin
 from qiskit_metal import designs
 
@@ -716,7 +716,7 @@ class TestAnalyses(unittest.TestCase, AssertionsMixin):
     def test_analyses_hamiltonian_ho_wavefunction(self):
         """Test the wavefunction function in the HO_waefunction.py file."""
         x_range = np.linspace(-5, 5, 5)
-        actual = wavefunction(1.0, 1.0, 0.0, x_range)
+        actual = wavefunction(1.0, 1.0, 0, x_range)
 
         expected = [
             2.10255658e-06, 2.47888124e-02, 5.64189584e-01, 2.47888124e-02,
@@ -771,14 +771,15 @@ class TestAnalyses(unittest.TestCase, AssertionsMixin):
             kappa_calculation.kappa_in(5.0E9, 30.0E-15, 4.5E9),
             161144.37988054403)
 
-    def test_analysis_sweeping_option_value(self):
-        """Test the option_value function in the Sweeping class"""
-        design = designs.DesignPlanar()
-        sweeping = Sweeping(design)
+    def test_analysis_sweeper_option_value(self):
+        """Test the option_value function in the Sweeper class"""
+        from abc import ABC
+        from qiskit_metal.analyses.core.base import QAnalysis
+        sweeper = Sweeper(QAnalysis)
 
         in_dict = {'a': 1, 'b': 'bee'}
-        self.assertEqual(sweeping.option_value(in_dict, 'a'), 1)
-        self.assertEqual(sweeping.option_value(in_dict, 'b'), 'bee')
+        self.assertEqual(sweeper.option_value(in_dict, 'a'), 1)
+        self.assertEqual(sweeper.option_value(in_dict, 'b'), 'bee')
 
 
 if __name__ == '__main__':

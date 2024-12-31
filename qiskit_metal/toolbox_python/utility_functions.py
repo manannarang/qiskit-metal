@@ -13,8 +13,6 @@
 # that they have been altered from the originals.
 """Simply utility functions to improve QOL of QM developers and QM users."""
 
-import importlib
-import inspect
 import logging
 import os
 import re
@@ -22,11 +20,13 @@ import sys
 import traceback
 import warnings
 from copy import deepcopy
-from typing import TYPE_CHECKING, Tuple
+from typing import Dict, List, TYPE_CHECKING, Tuple, Callable, Union
+import inspect
 
 import pandas as pd
 
 from qiskit_metal.draw import Vector
+from qiskit_metal.toolbox_metal.exceptions import InputError
 
 if TYPE_CHECKING:
     from qiskit_metal import logger
@@ -392,11 +392,38 @@ def bad_fillet_idxs(coords: list,
         if min(get_dist(coords[i - 1], coords[i], precision),
                get_dist(coords[i], coords[i + 1], precision)) < 2 * fradius:
             badlist.append(i)
-    if (get_dist(coords[length - 3], coords[length - 2], precision) <
-            2 * fradius) or (get_dist(coords[length - 2], coords[length - 1],
-                                      precision) < fradius):
+    if (get_dist(coords[length - 3], coords[length - 2], precision)
+            < 2 * fradius) or (get_dist(coords[length - 2], coords[length - 1],
+                                        precision) < fradius):
         badlist.append(length - 2)
     return badlist
+
+
+def good_fillet_idxs(coords: list,
+                     fradius: float,
+                     precision: int = 9,
+                     isclosed: bool = False):
+    """
+    Get list of vertex indices in a linestring (isclosed = False) or polygon (isclosed = True)
+    that can be filleted based on proximity to neighbors.
+
+    Args:
+        coords (list): Ordered list of tuples of vertex coordinates.
+        fradius (float): User-specified fillet radius from QGeometry table.
+        precision (int, optional): Digits of precision used for round(). Defaults to 9.
+        isclosed (bool, optional): Boolean denoting whether the shape is a linestring or
+            polygon. Defaults to False.
+
+    Returns:
+        list: List of indices of vertices that can be filleted.
+    """
+    if isclosed:
+        return toggle_numbers(
+            bad_fillet_idxs(coords, fradius, precision, isclosed=True),
+            len(coords))
+    return toggle_numbers(
+        bad_fillet_idxs(coords, fradius, precision, isclosed=False),
+        len(coords))[1:-1]
 
 
 def get_range_of_vertex_to_not_fillet(coords: list,
@@ -536,3 +563,75 @@ def can_write_to_path(file: str) -> Tuple[int, str]:
         return 1, directory_name
     else:
         return 0, directory_name
+
+
+#####################################################################################
+# function signature
+
+
+def check_all_required_args_provided(func: Callable,
+                                     args: Dict,
+                                     raise_exception: bool = True) -> List:
+    """Check all required arguments of func are provided by args
+
+    Args:
+        func (Callable): function callable to check
+        args (Dict): dictionary of provided arguments
+        raise_exception (bool=True): raise InputError exception if missing args found
+
+    Returns:
+        List: list of missing argument names
+
+    """
+    provided_args = list(args.keys())
+    missing_args = []
+    for param in inspect.signature(func).parameters.values():
+        if param.name in provided_args or param.name == 'self':
+            continue
+        if param.default is inspect._empty and param.name not in provided_args:
+            missing_args.append(param.name)
+
+    if missing_args and raise_exception:
+        out = ', '.join(missing_args)
+        raise InputError(
+            f'Missing values for arguments {out} for {func.__qualname__}')
+    return missing_args
+
+
+def get_all_args(func: Callable) -> List:
+    """get all the parameters of a function
+
+    Args:
+        func (Callable): function from which to get parameters
+
+    Returns:
+        List: list of parameters of the function
+    """
+    args = []
+    for param in inspect.signature(func).parameters.values():
+        if param.name == 'self':
+            continue
+        args.append(param.name)
+    return args
+
+
+#####################################################################################
+# Used for each row in qgeometry table to clean the name entered by user.
+
+
+def get_clean_name(name: str) -> str:
+    """Create a valid variable name from the given one by removing having it
+    begin with a letter or underscore followed by an unlimited string of
+    letters, numbers, and underscores.
+
+    Args:
+        name (str): Initial, possibly unusable, string to be modified.
+
+    Returns:
+        str: Variable name consistent with Python naming conventions.
+    """
+    # Remove invalid characters
+    name = re.sub("[^0-9a-zA-Z_]", "", name)
+    # Remove leading characters until we find a letter or underscore
+    name = re.sub("^[^a-zA-Z_]+", "", name)
+    return name

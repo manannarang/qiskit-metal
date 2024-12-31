@@ -11,6 +11,8 @@
 # Any modifications or derivative works of this code must retain this
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
+
+# modified by Chalmers/SK 20210611 to add DesignFlipChip
 """
 =================================================
 Designs (:mod:`qiskit_metal.designs`)
@@ -40,6 +42,23 @@ DesignPlanar
     DesignPlanar
 
 
+MultiPlanar
+---------------
+
+.. autosummary::
+    :toctree: ../stubs/
+
+    MultiPlanar
+
+
+DesignFlipChip
+---------------
+
+.. autosummary::
+    :toctree: ../stubs/
+
+    DesignFlipChip
+
 QNet
 ---------------
 
@@ -62,5 +81,7 @@ from .. import Dict
 from .. import is_design
 from .design_base import QDesign
 from .design_planar import DesignPlanar
+from .design_multiplanar import MultiPlanar
+from .design_flipchip import DesignFlipChip
 from .net_info import QNet
 from .interface_components import Components

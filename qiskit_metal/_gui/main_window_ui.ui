@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1300</width>
-    <height>848</height>
+    <width>1310</width>
+    <height>847</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -58,7 +58,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>2</number>
       </property>
       <property name="usesScrollButtons">
        <bool>false</bool>
@@ -96,21 +96,53 @@
         </property>
        </layout>
       </widget>
-      <widget class="QWidget" name="tabElements">
+      <widget class="QWidget" name="tabQGeometry">
        <attribute name="icon">
         <iconset resource="main_window_rc.qrc">
          <normaloff>:/elements</normaloff>:/elements</iconset>
        </attribute>
        <attribute name="title">
-        <string>Elements</string>
+        <string>QGeometry</string>
        </attribute>
        <attribute name="toolTip">
-        <string>Shoe the tables of elements of the the design</string>
+        <string>Show the QGeometry elements of the design</string>
        </attribute>
        <attribute name="whatsThis">
-        <string>Shoe the tables of elements of the the design</string>
+        <string>Show the QGeometry elements of the design</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_10">
+        <property name="spacing">
+         <number>0</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tabNetList">
+       <attribute name="icon">
+        <iconset resource="main_window_rc.qrc">
+         <normaloff>:/elements</normaloff>:/elements</iconset>
+       </attribute>
+       <attribute name="title">
+        <string>Net List</string>
+       </attribute>
+       <attribute name="toolTip">
+        <string>Show the Net List</string>
+       </attribute>
+       <attribute name="whatsThis">
+        <string>Show the Net List</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_22">
         <property name="spacing">
          <number>0</number>
         </property>
@@ -137,7 +169,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1300</width>
+     <width>1310</width>
      <height>24</height>
     </rect>
    </property>
@@ -296,6 +328,8 @@
    <addaction name="action_full_refresh"/>
    <addaction name="actionRebuild"/>
    <addaction name="actionBuildHistory"/>
+   <addaction name="separator"/>
+   <addaction name="actionWebHelp"/>
    <addaction name="separator"/>
   </widget>
   <widget class="QToolBar" name="toolBarView">
@@ -1235,6 +1269,18 @@
     <string>clickme</string>
    </property>
   </action>
+  <action name="actionWebHelp">
+   <property name="icon">
+    <iconset resource="main_window_rc.qrc">
+     <normaloff>:/browser</normaloff>:/browser</iconset>
+   </property>
+   <property name="text">
+    <string>Web Help</string>
+   </property>
+   <property name="toolTip">
+    <string>Open Web Help</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -1814,6 +1860,22 @@
     <hint type="destinationlabel">
      <x>649</x>
      <y>449</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionWebHelp</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>open_web_help()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>610</x>
+     <y>410</y>
     </hint>
    </hints>
   </connection>
