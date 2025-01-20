@@ -24,43 +24,36 @@ class RectangleHollow(QComponent):
     .. image::
         RectangleHollow.png
 
+    .. meta::
+        Rectangle Hollow
+
     Default Options:
         * width: '500um'
         * height: '300um'
-        * pos_x: '0um'
-        * pos_y: '0um'
-        * rotation: '0'
         * subtract: 'False'
         * helper: 'False'
-        * chip: 'main'
-        * layer: '1'
         * inner: Dict
             * height: '100um'
             * offset_x: '40um'
             * offset_y: '-20um'
-            * rotation: '15'
+            * orientation: '15'
     """
 
     default_options = Dict(width='500um',
                            height='300um',
-                           pos_x='0um',
-                           pos_y='0um',
-                           rotation='0',
                            subtract='False',
                            helper='False',
-                           chip='main',
-                           layer='1',
                            inner=dict(width='250um',
                                       height='100um',
                                       offset_x='40um',
                                       offset_y='-20um',
-                                      rotation='15'))
+                                      orientation='15'))
     """Default drawing options"""
 
     TOOLTIP = """A single configurable square"""
 
     def make(self):
-        """The make function implements the logic that creates the geoemtry
+        """The make function implements the logic that creates the geometry
         (poly, path, etc.) from the qcomponent.options dictionary of
         parameters, and the adds them to the design, using
         qcomponent.add_qgeometry(...), adding in extra needed information, such
@@ -72,9 +65,9 @@ class RectangleHollow(QComponent):
         rec1 = draw.rectangle(p.inner.width, p.inner.height,
                               p.pos_x + p.inner.offset_x,
                               p.pos_y + p.inner.offset_y)
-        rec1 = draw.rotate(rec1, p.inner.rotation)
+        rec1 = draw.rotate(rec1, p.inner.orientation)
         rect = draw.subtract(rect, rec1)
-        rect = draw.rotate(rect, p.rotation)
+        rect = draw.rotate(rect, p.orientation)
 
         # add qgeometry
         self.add_qgeometry('poly', {'rect': rect},

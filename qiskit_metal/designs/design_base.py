@@ -51,7 +51,7 @@ class QDesign():
     """
     # pylint: disable=too-many-instance-attributes, too-many-public-methods
 
-    # Dummy private attribute used to check if an instanciated object is
+    # Dummy private attribute used to check if an instantiated object is
     # indeed a QDesign class. The problem is that the `isinstance`
     # built-in method fails when this module is reloaded.
     # Used by `is_design` to check.
@@ -227,6 +227,11 @@ class QDesign():
     def qgeometry(self) -> 'QGeometryTables':
         """Returns the QGeometryTables (Use for advanced users only)"""
         return self._qgeometry
+
+    @property
+    def qnet(self) -> 'QNet':
+        """Returns the QNet (Use for advanced users only)"""
+        return self._qnet
 
     @property
     def qcomponent_latest_assigned_id(self) -> int:
@@ -800,8 +805,8 @@ class QDesign():
                 Returns the number as is. Int to int, etc.
 
 
-        Arithemetic:
-            Some basic arithemetic can be handled as well, such as `'-2 * 1e5 nm'`
+        Arithmetic:
+            Some basic arithmetic can be handled as well, such as `'-2 * 1e5 nm'`
             will yield float(-0.2) when the default units are set to `mm`.
 
         Default units:

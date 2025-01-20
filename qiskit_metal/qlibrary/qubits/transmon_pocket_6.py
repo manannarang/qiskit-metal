@@ -44,13 +44,11 @@ class TransmonPocket6(BaseQubit):
         Create a standard pocket transmon qubit for a ground plane.
         Can have variable number of connection pads, up to 6.
 
-    Options:
+    Default Options:
         Convention: Values (unless noted) are strings with units included,
         (e.g., '30um')
 
     Pocket:
-        * pos_x / pos_y   - where the center of the pocket should be located on chip
-          (where the 'junction' is)
         * pad_gap         - the distance between the two charge islands, which is also the
           resulting 'length' of the pseudo junction
         * inductor_width  - width of the pseudo junction between the two charge islands
@@ -60,7 +58,6 @@ class TransmonPocket6(BaseQubit):
         * pad_height      - the size (y-axis) of the charge island pads
         * pocket_width    - size of the pocket (cut out in ground) along x-axis
         * pocket_height   - size of the pocket (cut out in ground) along y-axis
-        * orientation     - degree of qubit rotation
 
     Connector lines:
         * pad_gap        - space between the connector pad and the charge island it is
@@ -84,9 +81,9 @@ class TransmonPocket6(BaseQubit):
         Below is a sketch of the qubit
         ::
 
-                 -1             0
+                 +1              0             +1
                 _________________________________
-            -1  |______ ____    _|_    __________|          Y
+            -1  |______ ____    _|_    __________|  +1      Y
                 |      |____|  |___|   |____|    |          ^
                 |        __________________      |          |
                 |       |     island       |     |          |----->  X
@@ -98,18 +95,20 @@ class TransmonPocket6(BaseQubit):
                 |       |__________________|     |
                 |        ______                  |
                 |_______|______|                 |
-                |________________________________|   +1
-                                            +1
+            -1  |________________________________|   +1
+                 
+                 -1                            -1
 
     .. image::
-        TransmonPocket6.png
+        transmon_pocket_6.png
+
+    .. meta::
+        Transmon Pocket 6
+
     """
 
     # Default drawing options
     default_options = Dict(
-        chip='main',
-        pos_x='0um',
-        pos_y='0um',
         pad_gap='30um',
         inductor_width='20um',
         pad_width='455um',
@@ -118,7 +117,6 @@ class TransmonPocket6(BaseQubit):
         pocket_height='650um',
         # 90 has dipole aligned along the +X axis,
         # while 0 has dipole aligned along the +Y axis
-        orientation='0',
         _default_connection_pads=Dict(
             pad_gap='15um',
             pad_width='125um',
@@ -147,7 +145,7 @@ class TransmonPocket6(BaseQubit):
     def make(self):
         """Define the way the options are turned into QGeometry.
 
-        The make function implements the logic that creates the geoemtry
+        The make function implements the logic that creates the geometry
         (poly, path, etc.) from the qcomponent.options dictionary of
         parameters, and the adds them to the design, using
         qcomponent.add_qgeometry(...), adding in extra needed
@@ -159,7 +157,7 @@ class TransmonPocket6(BaseQubit):
     def make_pocket(self):
         """Makes standard transmon in a pocket."""
 
-        # self.p allows us to directly access parsed values (string -> numbers) form the user option
+        # self.p allows us to directly access parsed values (string -> numbers) from the user option
         p = self.p
 
         # since we will reuse these options, parse them once and define them as variables
@@ -197,18 +195,18 @@ class TransmonPocket6(BaseQubit):
                            width=p.inductor_width)
 
     def make_connection_pads(self):
-        """Makes standard transmon in a pocket."""
+        """Goes through connector pads and makes each one."""
         for name in self.options.connection_pads:
             self.make_connection_pad(name)
 
     def make_connection_pad(self, name: str):
-        """Makes n individual connector.
+        """Makes an individual connector.
 
         Args:
             name (str) : Name of the connector
         """
 
-        # self.p allows us to directly access parsed values (string -> numbers) form the user option
+        # self.p allows us to directly access parsed values (string -> numbers) from the user option
         p = self.p
         pc = self.p.connection_pads[name]  # parser on connector options
 

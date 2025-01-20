@@ -51,9 +51,9 @@ class TransmonPocket(BaseQubit):
         Below is a sketch of the qubit
         ::
 
-                 -1
+                 +1                            +1
                 ________________________________
-            -1  |______ ____           __________|          Y
+            -1  |______ ____           __________|   +1     Y
                 |      |____|         |____|     |          ^
                 |        __________________      |          |
                 |       |     island       |     |          |----->  X
@@ -65,28 +65,27 @@ class TransmonPocket(BaseQubit):
                 |       |__________________|     |
                 |        ______                  |
                 |_______|______|                 |
-                |________________________________|   +1
-                                            +1
+            -1  |________________________________|   +1
+                 
+                 -1                            -1
 
     .. image::
-        TransmonPocket.png
+        transmon_pocket.png
+
+    .. meta::
+        Transmon Pocket
 
     BaseQubit Default Options:
-        * pos_x: '0um'
-        * pos_y: '0um'
         * connection_pads: Empty Dict -- The dictionary which contains all active connection lines for the qubit.
         * _default_connection_pads: Empty Dict -- The default values for the (if any) connection lines of the qubit.
 
     Default Options:
-        * pos_x: '0um' -- Where the center of the pocket should be located on chip
-        * pos_y: '0um' -- Where the center of the pocket should be located on chip
         * pad_gap: '30um' -- The distance between the two charge islands, which is also the resulting 'length' of the pseudo junction
         * inductor_width: '20um' -- Width of the pseudo junction between the two charge islands (if in doubt, make the same as pad_gap). Really just for simulating in HFSS / other EM software
         * pad_width: '455um' -- The width (x-axis) of the charge island pads
         * pad_height: '90um' -- The size (y-axis) of the charge island pads
         * pocket_width: '650um' -- Size of the pocket (cut out in ground) along x-axis
         * pocket_height: '650um' -- Size of the pocket (cut out in ground) along y-axis
-        * orientation: '0' -- Degree of qubit rotation
         * _default_connection_pads: Dict
             * pad_gap: '15um' -- Space between the connector pad and the charge island it is nearest to
             * pad_width: '125um' -- Width (x-axis) of the connector pad
@@ -103,9 +102,6 @@ class TransmonPocket(BaseQubit):
     """
 
     default_options = Dict(
-        chip='main',
-        pos_x='0um',
-        pos_y='0um',
         pad_gap='30um',
         inductor_width='20um',
         pad_width='455um',
@@ -114,7 +110,6 @@ class TransmonPocket(BaseQubit):
         pocket_height='650um',
         # 90 has dipole aligned along the +X axis,
         # while 0 has dipole aligned along the +Y axis
-        orientation='0',
         _default_connection_pads=Dict(
             pad_gap='15um',
             pad_width='125um',
@@ -143,7 +138,7 @@ class TransmonPocket(BaseQubit):
     def make(self):
         """Define the way the options are turned into QGeometry.
 
-        The make function implements the logic that creates the geoemtry
+        The make function implements the logic that creates the geometry
         (poly, path, etc.) from the qcomponent.options dictionary of
         parameters, and the adds them to the design, using
         qcomponent.add_qgeometry(...), adding in extra needed
@@ -155,8 +150,11 @@ class TransmonPocket(BaseQubit):
     def make_pocket(self):
         """Makes standard transmon in a pocket."""
 
-        # self.p allows us to directly access parsed values (string -> numbers) form the user option
+        # self.p allows us to directly access parsed values (string -> numbers) from the user option
         p = self.p
+
+        # extract chip name
+        chip = p.chip
 
         # since we will reuse these options, parse them once and define them as varaibles
         pad_width = p.pad_width
@@ -184,29 +182,38 @@ class TransmonPocket(BaseQubit):
         [rect_jj, pad_top, pad_bot, rect_pk] = polys
 
         # Use the geometry to create Metal qgeometry
-        self.add_qgeometry('poly', dict(pad_top=pad_top, pad_bot=pad_bot))
-        self.add_qgeometry('poly', dict(rect_pk=rect_pk), subtract=True)
+        self.add_qgeometry('poly',
+                           dict(pad_top=pad_top, pad_bot=pad_bot),
+                           chip=chip)
+        self.add_qgeometry('poly',
+                           dict(rect_pk=rect_pk),
+                           subtract=True,
+                           chip=chip)
         # self.add_qgeometry('poly', dict(
         #     rect_jj=rect_jj), helper=True)
         self.add_qgeometry('junction',
                            dict(rect_jj=rect_jj),
-                           width=p.inductor_width)
+                           width=p.inductor_width,
+                           chip=chip)
 
     def make_connection_pads(self):
-        """Makes standard transmon in a pocket."""
+        """Goes through connector pads and makes each one."""
         for name in self.options.connection_pads:
             self.make_connection_pad(name)
 
     def make_connection_pad(self, name: str):
-        """Makes n individual connector.
+        """Makes an individual connector.
 
         Args:
             name (str) : Name of the connector
         """
 
-        # self.p allows us to directly access parsed values (string -> numbers) form the user option
+        # self.p allows us to directly access parsed values (string -> numbers) from the user option
         p = self.p
         pc = self.p.connection_pads[name]  # parser on connector options
+
+        # extract chip name
+        chip = p.chip
 
         # define commonly used variables once
         cpw_width = pc.cpw_width
@@ -249,12 +256,15 @@ class TransmonPocket(BaseQubit):
                                        [p.pos_x, p.pos_y])
         [connector_pad, connector_wire_path, connector_wire_CON] = objects
 
-        self.add_qgeometry('poly', {f'{name}_connector_pad': connector_pad})
+        self.add_qgeometry('poly', {f'{name}_connector_pad': connector_pad},
+                           chip=chip)
         self.add_qgeometry('path', {f'{name}_wire': connector_wire_path},
-                           width=cpw_width)
+                           width=cpw_width,
+                           chip=chip)
         self.add_qgeometry('path', {f'{name}_wire_sub': connector_wire_path},
                            width=cpw_width + 2 * pc.cpw_gap,
-                           subtract=True)
+                           subtract=True,
+                           chip=chip)
 
         ############################################################
 
@@ -263,4 +273,5 @@ class TransmonPocket(BaseQubit):
         self.add_pin(name,
                      points=points[-2:],
                      width=cpw_width,
-                     input_as_norm=True)
+                     input_as_norm=True,
+                     chip=chip)

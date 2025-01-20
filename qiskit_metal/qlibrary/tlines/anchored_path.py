@@ -21,7 +21,7 @@ from qiskit_metal.qlibrary.core import QRoute, QRoutePoint
 from qiskit_metal.toolbox_metal import math_and_overrides as mao
 from qiskit_metal.toolbox_metal.exceptions import QiskitMetalDesignError
 from collections.abc import Mapping
-from shapely.ops import cascaded_union
+from shapely.ops import unary_union
 from shapely.geometry import CAP_STYLE
 import geopandas as gpd
 
@@ -29,6 +29,9 @@ import geopandas as gpd
 def intersecting(a: np.array, b: np.array, c: np.array, d: np.array) -> bool:
     """Returns whether segment ab intersects or overlaps with segment cd, where
     a, b, c, and d are all coordinates.
+
+    .. meta::
+        Anchored Path
 
     Args:
         a (np.array): Coordinate
@@ -112,8 +115,6 @@ class RouteAnchors(QRoute):
             * start_jogged_extension: '' -- Lead-in, jogged extension of lead-in. Described as list of tuples
             * end_jogged_extension: '' -- Lead-out, jogged extension of lead-out. Described as list of tuples
         * total_length: '7mm'
-        * chip: 'main' -- Which chip is this component attached to.  Defaults to 'main'.
-        * layer: '1' -- Which layer this component should be rendered on.  Defaults to '1'.
         * trace_width: 'cpw_width' -- Defines the width of the line.  Defaults to 'cpw_width'.
 
     Default Options:
@@ -135,7 +136,7 @@ class RouteAnchors(QRoute):
 
     TOOLTIP = """Creates and connects a series of anchors through which the Route passes."""
 
-    from shapely.ops import cascaded_union
+    from shapely.ops import unary_union
     from matplotlib import pyplot as plt
     import geopandas as gpd
 
@@ -160,7 +161,7 @@ class RouteAnchors(QRoute):
                 row['width'] / 2, cap_style=CAP_STYLE.flat))
         # merge all the polygons
         polygons = self.design.components[component_name].qgeometry_list('poly')
-        boundary = gpd.GeoSeries(cascaded_union(polygons + paths_converted))
+        boundary = gpd.GeoSeries(unary_union(polygons + paths_converted))
         boundary_coords = list(boundary.geometry.exterior[0].coords)
         if any(
                 intersecting(segment[0], segment[1], boundary_coords[i],
@@ -313,13 +314,13 @@ class RouteAnchors(QRoute):
                 if (end_direction is None) or (mao.dot(end_direction,
                                                        corner2 - end) >= 0):
                     return np.expand_dims(corner2, axis=0)
-            if (mao.dot(start_direction, corner3 - start) >=
-                    0) and startc3c4end:
+            if (mao.dot(start_direction, corner3 - start)
+                    >= 0) and startc3c4end:
                 if (end_direction is None) or (mao.dot(end_direction,
                                                        corner4 - end) >= 0):
                     return np.vstack((corner3, corner4))
-            if (mao.dot(start_direction, corner5 - start) >=
-                    0) and startc5c6end:
+            if (mao.dot(start_direction, corner5 - start)
+                    >= 0) and startc5c6end:
                 if (end_direction is None) or (mao.dot(end_direction,
                                                        corner6 - end) >= 0):
                     return np.vstack((corner5, corner6))

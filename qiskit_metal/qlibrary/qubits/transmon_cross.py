@@ -12,7 +12,6 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-import numpy as np
 from qiskit_metal import draw, Dict
 from qiskit_metal.qlibrary.core import BaseQubit
 
@@ -30,7 +29,7 @@ class TransmonCross(BaseQubit):  # pylint: disable=invalid-name
     makes up the connector. Note, DC SQUID currently represented by single
     inductance sheet
 
-    Add connectors to it using the `connection_pads` dictonary. See BaseQubit for more
+    Add connectors to it using the `connection_pads` dictionary. See BaseQubit for more
     information.
 
     Sketch:
@@ -46,21 +45,19 @@ class TransmonCross(BaseQubit):  # pylint: disable=invalid-name
 
 
     .. image::
-        TransmonCross.png
+        transmon_cross.png
+
+    .. meta::
+        Transmon Cross
 
     BaseQubit Default Options:
-        * pos_x: '0um' -- Where the center of the Crossmon should be located on chip
-        * pos_y: '0um' -- Where the center of the Crossmon should be located on chip
         * connection_pads: Empty Dict -- The dictionary which contains all active connection lines for the qubit.
         * _default_connection_pads: empty Dict -- The default values for the (if any) connection lines of the qubit.
 
     Default Options:
-        * pos_x: '0um' -- Where the center of the Crossmon should be located on chip
-        * pos_y: '0um' -- Where the center of the Crossmon should be located on chip
         * cross_width: '20um' -- Width of the CPW center trace making up the Crossmon
         * cross_length: '200um' -- Length of one Crossmon arm (from center)
         * cross_gap: '20um' -- Width of the CPW gap making up the Crossmon
-        * orientation: '0' -- How to orient the qubit and connectors in the end (where the +X vector should point, '+X', '-X','+Y','-Y')
         * _default_connection_pads: Dict
             * connector_type: '0' -- 0 = Claw type, 1 = gap type
             * claw_length: '30um' -- Length of the claw 'arms', measured from the connector center trace
@@ -71,19 +68,18 @@ class TransmonCross(BaseQubit):  # pylint: disable=invalid-name
     """
 
     default_options = Dict(
-        pos_x='0um',
-        pos_y='0um',
         cross_width='20um',
         cross_length='200um',
         cross_gap='20um',
-        orientation='0',
-        layer='1',
+        chip='main',
         _default_connection_pads=Dict(
             connector_type='0',  # 0 = Claw type, 1 = gap type
             claw_length='30um',
             ground_spacing='5um',
             claw_width='10um',
             claw_gap='6um',
+            claw_cpw_length='40um',
+            claw_cpw_width='10um',
             connector_location=
             '0'  # 0 => 'west' arm, 90 => 'north' arm, 180 => 'east' arm
         ))
@@ -109,15 +105,18 @@ class TransmonCross(BaseQubit):  # pylint: disable=invalid-name
     def make_pocket(self):
         """Makes a basic Crossmon, 4 arm cross."""
 
-        # self.p allows us to directly access parsed values (string -> numbers) form the user option
+        # self.p allows us to directly access parsed values (string -> numbers) from the user option
         p = self.p
 
         cross_width = p.cross_width
         cross_length = p.cross_length
         cross_gap = p.cross_gap
 
+        # access to chip name
+        chip = p.chip
+
         # Creates the cross and the etch equivalent.
-        cross_line = draw.shapely.ops.cascaded_union([
+        cross_line = draw.shapely.ops.unary_union([
             draw.LineString([(0, cross_length), (0, -cross_length)]),
             draw.LineString([(cross_length, 0), (-cross_length, 0)])
         ])
@@ -139,9 +138,15 @@ class TransmonCross(BaseQubit):  # pylint: disable=invalid-name
         [cross, cross_etch, rect_jj] = polys
 
         # generate qgeometry
-        self.add_qgeometry('poly', dict(cross=cross))
-        self.add_qgeometry('poly', dict(cross_etch=cross_etch), subtract=True)
-        self.add_qgeometry('junction', dict(rect_jj=rect_jj), width=cross_width)
+        self.add_qgeometry('poly', dict(cross=cross), chip=chip)
+        self.add_qgeometry('poly',
+                           dict(cross_etch=cross_etch),
+                           subtract=True,
+                           chip=chip)
+        self.add_qgeometry('junction',
+                           dict(rect_jj=rect_jj),
+                           width=cross_width,
+                           chip=chip)
 
 
 ############################CONNECTORS##################################################################################################
@@ -158,20 +163,25 @@ class TransmonCross(BaseQubit):  # pylint: disable=invalid-name
             name (str) : Name of the connector pad
         """
 
-        # self.p allows us to directly access parsed values (string -> numbers) form the user option
+        # self.p allows us to directly access parsed values (string -> numbers) from the user option
         p = self.p
         cross_width = p.cross_width
         cross_length = p.cross_length
         cross_gap = p.cross_gap
 
+        # access to chip name
+        chip = p.chip
+
         pc = self.p.connection_pads[name]  # parser on connector options
         c_g = pc.claw_gap
         c_l = pc.claw_length
         c_w = pc.claw_width
+        c_c_w = pc.claw_cpw_width
+        c_c_l = pc.claw_cpw_length
         g_s = pc.ground_spacing
         con_loc = pc.connector_location
 
-        claw_cpw = draw.box(0, -c_w / 2, -4 * c_w, c_w / 2)
+        claw_cpw = draw.box(-c_w, -c_c_w / 2, -c_c_l - c_w, c_c_w / 2)
 
         if pc.connector_type == 0:  # Claw connector
             t_claw_height = 2*c_g + 2 * c_w + 2*g_s + \
@@ -183,18 +193,18 @@ class TransmonCross(BaseQubit):  # pylint: disable=invalid-name
                                      t_claw_height / 2 - c_w)
             claw_base = claw_base.difference(claw_subtract)
 
-            connector_arm = draw.shapely.ops.cascaded_union(
-                [claw_base, claw_cpw])
+            connector_arm = draw.shapely.ops.unary_union([claw_base, claw_cpw])
             connector_etcher = draw.buffer(connector_arm, c_g)
         else:
-            connector_arm = claw_cpw
+            connector_arm = draw.box(0, -c_w / 2, -4 * c_w, c_w / 2)
             connector_etcher = draw.buffer(connector_arm, c_g)
 
         # Making the pin for  tracking (for easy connect functions).
         # Done here so as to have the same translations and rotations as the connector. Could
         # extract from the connector later, but since allowing different connector types,
         # this seems more straightforward.
-        port_line = draw.LineString([(-4 * c_w, -c_w / 2), (-4 * c_w, c_w / 2)])
+        port_line = draw.LineString([(-c_c_l - c_w, -c_c_w / 2),
+                                     (-c_c_l - c_w, c_w / 2)])
 
         claw_rotate = 0
         if con_loc > 135:
@@ -212,9 +222,11 @@ class TransmonCross(BaseQubit):  # pylint: disable=invalid-name
         [connector_arm, connector_etcher, port_line] = polys
 
         # Generates qgeometry for the connector pads
-        self.add_qgeometry('poly', {f'{name}_connector_arm': connector_arm})
+        self.add_qgeometry('poly', {f'{name}_connector_arm': connector_arm},
+                           chip=chip)
         self.add_qgeometry('poly',
                            {f'{name}_connector_etcher': connector_etcher},
-                           subtract=True)
+                           subtract=True,
+                           chip=chip)
 
-        self.add_pin(name, port_line.coords, c_w)
+        self.add_pin(name, port_line.coords, c_c_w)

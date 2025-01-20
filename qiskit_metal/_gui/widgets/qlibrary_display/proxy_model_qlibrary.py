@@ -18,7 +18,7 @@ Proxy Model to clean display of QComponents in Library tab
 import typing
 
 from PySide2.QtCore import QModelIndex, QSortFilterProxyModel, Qt, QSize
-from PySide2.QtWidgets import QWidget
+from PySide2.QtWidgets import QWidget, QFileSystemModel
 
 
 class LibraryFileProxyModel(QSortFilterProxyModel):
@@ -37,8 +37,9 @@ class LibraryFileProxyModel(QSortFilterProxyModel):
         # finds all files that
         # (Aren't hidden (begin w/ .), don't begin with __init__, don't begin with _template, etc. AND end in .py)  OR (don't begin with __pycache__ and don't have a '.' in the name   # pylint: disable=line-too-long
         # (QComponent files) OR (Directories)
-        self.accepted_files__regex = r"(^((?!\.))(?!__init__)(?!_template)(?!__pycache__).*\.py)|(?!__pycache__)(?!base)(^([^.]+)$)"  # pylint: disable=line-too-long
+        self.accepted_files__regex = r"(^((?!\.))(?!base)(?!__init__)(?!_template)(?!_parsed)(?!__pycache__).*\.py)|(?!__pycache__)(^([^.]+)$)"  # pylint: disable=line-too-long
         self.setFilterRegExp(self.accepted_files__regex)
+        self.filter_text = ""
 
     def filterAcceptsColumn(
             self, source_column: int, source_parent: QModelIndex) -> bool:  #pylint: disable=unused-argument
@@ -57,6 +58,35 @@ class LibraryFileProxyModel(QSortFilterProxyModel):
             return False
         return True
 
+    def filterAcceptsRow(
+            self, source_row: int, source_parent: QModelIndex) -> bool:  #pylint: disable=unused-argument
+        """
+        Filters out unwanted file information in display
+        Args:
+            source_column(int): Display column in question
+            source_parent(QModelIndex): Parent index
+        Returns:
+            bool: Whether to display column
+
+        """
+        source_model = self.sourceModel()
+        nameCache = source_model.nameCache
+
+        index = source_model.index(source_row, 0, source_parent)
+        relativeFilename = index.data(QFileSystemModel.FileNameRole)
+        displayName = nameCache[
+            relativeFilename] if relativeFilename in nameCache else None
+        #fi = source_model.fileInfo(index)
+
+        if displayName != None:
+            found = (self.filter_text in relativeFilename) or (self.filter_text
+                                                               in displayName)
+        else:
+            found = (self.filter_text in relativeFilename)
+
+        accept = (not relativeFilename.startswith("_")) and found
+        return accept
+
     def data(self,
              index: QModelIndex,
              role: int = Qt.DisplayRole) -> typing.Any:
@@ -72,8 +102,5 @@ class LibraryFileProxyModel(QSortFilterProxyModel):
         # allow editable
         if role == Qt.EditRole:
             return self.data(index, Qt.DisplayRole)
-
-        if role == Qt.SizeHintRole:
-            return QSize(10, 25)
 
         return super().data(index, role)

@@ -1,11 +1,15 @@
 # Qiskit Metal 
-[![License](https://img.shields.io/github/license/Qiskit/qiskit-metal.svg?style=popout-square)](https://opensource.org/licenses/Apache-2.0)<!--- long-description-skip-begin -->[![Release](https://img.shields.io/github/release/Qiskit/qiskit-metal.svg?style=popout-square)](https://github.com/Qiskit/qiskit-metal/releases)<!--- long-description-skip-begin -->[![join slack](https://img.shields.io/badge/slack-@qiskit-yellow.svg?logo=slack&style=popout-square)](https://ibm.co/joinqiskitslack)[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4618153.svg)](https://doi.org/10.5281/zenodo.4618153)
+[![License](https://img.shields.io/github/license/Qiskit/qiskit-metal.svg?style=popout-square)](https://opensource.org/licenses/Apache-2.0)<!--- long-description-skip-begin -->[![Release](https://img.shields.io/github/release/Qiskit/qiskit-metal.svg?style=popout-square)](https://github.com/Qiskit/qiskit-metal/releases)<!--- long-description-skip-begin -->[![join slack](https://img.shields.io/badge/slack-@qiskit-yellow.svg?logo=slack&style=popout-square)](https://qisk.it/join-slack)[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4618153.svg)](https://doi.org/10.5281/zenodo.4618153)
  
 >![Welcome to Qiskit Metal!](https://raw.githubusercontent.com/Qiskit/qiskit-metal/main/docs/images/zkm_banner.png 'Welcome to Qiskit Metal')
 > Qiskit Metal is an open-source framework for engineers and scientists to design superconducting quantum devices with ease.
 
+
+## Major Update: Upcoming Qiskit Metal Release 🚀
+We're excited to share that we're nearing the completion of porting Qiskit Metal from PySide2 to PySide6! This update enables native support for M* Macs (Apple Silicon) and includes several other enhancements for the upcoming release. Please take a moment to review and provide feedback on [Pull Request #1002](https://github.com/qiskit-community/qiskit-metal/pull/1002) before we proceed with merging and tagging. Your input is invaluable to ensure the release meets everyone's expectations. Thank you for your continued contributions!
+
 ## Installation
-If you are interested in customizing your experience, or if you are unable to install qiskit-metal using the `pip install` instructions below, consider installing directly the source code, following the instructions in the [documentation](https://qiskit.org/documentation/metal/installation.html) and/or the [installation instructions for developers](https://github.com/Qiskit/qiskit-metal/blob/main/README_developers.md).
+If you are interested in customizing your experience, or if you are unable to install qiskit-metal using the `pip install` instructions below, consider installing directly the source code, following the instructions in the [documentation](https://qiskit-community.github.io/qiskit-metal/installation.html) and/or the [installation instructions for developers](https://github.com/Qiskit/qiskit-metal/blob/main/README_developers.md).
 
 For normal use, please continue reading.
 
@@ -16,7 +20,7 @@ pip install qiskit-metal
 ```
 PIP will handle most of the dependencies automatically and you will always install the latest (and well-tested) version of the package.
 
-Some of the dependencies, namely pyside2 and geopandas, might require manual installation, depending on your specific system compatibility. If you encounter installation or execution errors, please refer first to the [FAQ](https://qiskit.org/documentation/metal/faq.html).
+Some of the dependencies, namely pyside2 and geopandas, might require manual installation, depending on your specific system compatibility. If you encounter installation or execution errors, please refer first to the [FAQ](https://qiskit-community.github.io/qiskit-metal/faq.html).
 
 We recommend to install qiskit-metal in a conda environment or venv, to prevent version conflicts with pre-existing package versions.
 
@@ -25,7 +29,7 @@ At this time, we recommend using Jupyter notebook/lab to be able to access all t
 
 If you require a fresh installation, please refer to either [anaconda.org](https://anaconda.org/) or [jupyter.org](https://jupyter.org/install).
 
-Unless you installed the entire `jupyter` package in your current environment, do not forget to create the appropriate kernel to make the environment (thus qiskit-metal) available to jupyter (instructions in the [FAQ](https://qiskit.org/documentation/metal/faq.html))
+Unless you installed the entire `jupyter` package in your current environment, do not forget to create the appropriate kernel to make the environment (thus qiskit-metal) available to jupyter (instructions in the [FAQ](https://qiskit-community.github.io/qiskit-metal/faq.html))
 
 ## Creating Your First Quantum Component in Qiskit Metal:
 Now that Qiskit Metal is installed, it's time to begin working with it.
@@ -78,7 +82,7 @@ $ python
 >>> gui.main_window.close()
 ```
 
-A script is available [here](https://qiskit.org/documentation/metal/tut/overview/1.1%20High%20Level%20Demo%20of%20Qiskit%20Metal.html), where we also show the overview of Qiskit Metal.
+A script is available [here](https://qiskit-community.github.io/qiskit-metal/tut/overview/1.1%20High%20Level%20Demo%20of%20Qiskit%20Metal.html), where we also show the overview of Qiskit Metal.
 
 ## Community and Support
 
@@ -91,20 +95,20 @@ The streaming will also be recorded and made available [here](https://www.youtub
 Through June 2021 we are offering live tutorials and Q&A. [Sign up](https://airtable.com/shrxQEgKqZCf319F3) to receive an invite to the upcoming sessions.  The streaming will also be recorded and made available for offline review.  Find [here](https://github.com/Qiskit/qiskit-metal/blob/main/README_Tutorials.md) more details on schedule and use the Slack channel to give us feedback and to request the most relevant content to you.
 
 #### Get help: Slack 
-[![join slack](https://img.shields.io/badge/slack-blue.svg?logo=slack)](https://ibm.co/joinqiskitslack)
+[![join slack](https://img.shields.io/badge/slack-blue.svg?logo=slack)](https://qisk.it/join-slack)
 
-Use the slack channel.  Join [qiskit slack](https://ibm.co/joinqiskitslack) and then join the `#metal` channel to communicate with the developers and other participants.  You may also use this channel to inquire about collaborations.
+Use the slack channel.  Join [qiskit slack](https://qisk.it/join-slack) and then join the `#metal` channel to communicate with the developers and other participants.  You may also use this channel to inquire about collaborations.
 
 ## Contribution Guidelines
 If you'd like to contribute to Qiskit Metal, please take a look at our
 [contribution guidelines](https://github.com/Qiskit/qiskit-metal/blob/main/CONTRIBUTING.md). This project adheres to Qiskit's [code of conduct](https://github.com/Qiskit/qiskit-metal/blob/main/CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code.
 We use [GitHub issues](https://github.com/Qiskit/qiskit-metal/issues) for tracking requests and bugs. Please
-[join the Qiskit Slack community](https://ibm.co/joinqiskitslack)
+[join the Qiskit Slack community](https://qisk.it/join-slack)
 and use our [Qiskit Slack channel](https://qiskit.slack.com) for discussion and simple questions.
 For questions that are more suited for a forum we use the Qiskit tag in the [Stack Exchange](https://quantumcomputing.stackexchange.com/questions/tagged/qiskit).
 ## Next Steps
 Now you're set up and ready to check out some of the other examples from our
-[Qiskit Metal Tutorials](https://github.com/Qiskit/qiskit-metal/blob/main/tutorials/) repository or [Qiskit Metal Documentation](https://qiskit.org/documentation/metal/tut/).
+[Qiskit Metal Tutorials](https://github.com/Qiskit/qiskit-metal/blob/main/tutorials/) repository or [Qiskit Metal Documentation](https://qiskit-community.github.io/qiskit-metal/tut/).
 ## Authors and Citation
 Qiskit Metal is the work of [many people](https://github.com/Qiskit/qiskit-metal/pulse/monthly) who contribute to the project at different levels. Metal was conceived and developed by [Zlatko Minev](https://www.zlatko-minev.com) at IBM; then co-led with Thomas McConkey. If you use Qiskit Metal, please cite as per the included [BibTeX file](https://github.com/Qiskit/qiskit-metal/blob/main/Qiskit_Metal.bib). For icon attributions, see [here](https://github.com/Qiskit/qiskit-metal/blob/main/qiskit_metal/_gui/_imgs/icon_attributions.txt).
 ## Changelog and Release Notes

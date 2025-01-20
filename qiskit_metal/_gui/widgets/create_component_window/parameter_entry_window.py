@@ -34,7 +34,8 @@ import importlib
 import inspect
 import os
 import random
-from collections import OrderedDict, Callable
+from collections import OrderedDict
+from collections.abc import Callable
 from inspect import signature
 from pathlib import Path
 from typing import TYPE_CHECKING, Union, Type
@@ -46,6 +47,7 @@ from PySide2.QtWidgets import QDockWidget, QWidget
 from PySide2.QtWidgets import (QMainWindow, QMessageBox)
 
 from qiskit_metal import designs
+from qiskit_metal.qlibrary.core import QComponent
 from qiskit_metal.toolbox_python.attr_dict import Dict
 from .model_view.tree_delegate_param_entry import ParamDelegate
 from .model_view.tree_model_param_entry import TreeModelParamEntry, LeafNode, Node
@@ -131,7 +133,7 @@ class ParameterEntryWindow(QMainWindow):
 
             Args:
                 func (Callable): current function causing exceptions - should  be ONLY  qcpe instance methods
-                    because decoraters
+                    because decorators
                 assumes arg[0] is a self who has a valid logger
 
             """
@@ -156,7 +158,6 @@ class ParameterEntryWindow(QMainWindow):
 
             return wrapper
 
-    @QComponentParameterEntryExceptionDecorators.entry_exception_pop_up_warning
     def _setup_help(self):
         """Called when we need to set a new help"""
 
@@ -165,6 +166,12 @@ class ParameterEntryWindow(QMainWindow):
             raise Exception("No Component found.")
 
         filepath = self.qcomponent_file_path
+
+        imagefilename = Path(filepath.replace(".py", ".png")).name
+        imagepath = Path(
+            filepath
+        ).parent.parent.parent / "_gui" / "_imgs" / "components" / imagefilename
+
         doc_class = self.format_docstr(inspect.getdoc(component))
         doc_init = self.format_docstr(inspect.getdoc(component.__init__))
 
@@ -179,6 +186,10 @@ class ParameterEntryWindow(QMainWindow):
             </tbody>
         </table>
         '''
+
+        if imagepath.is_file():
+            text += f'''<img src="{str(imagepath)}"/>'''
+
         text += f'''
             <div class="h1">Class docstring:</div>
             {doc_class}
@@ -214,7 +225,6 @@ class ParameterEntryWindow(QMainWindow):
         """
         return text
 
-    @QComponentParameterEntryExceptionDecorators.entry_exception_pop_up_warning
     def _setup_source(self):
         """Called when we need to set up a new source"""
 
@@ -278,7 +288,7 @@ class ParameterEntryWindow(QMainWindow):
 
     @QComponentParameterEntryExceptionDecorators.entry_exception_pop_up_warning
     def add_k_dict_row(self):
-        """ Add key, dictionary-value to parent row based on what row is highlighed in treeview"""
+        """ Add key, dictionary-value to parent row based on what row is highlighted in treeview"""
         cur_index = self.ui.qcomponent_param_tree_view.currentIndex()
 
         fake_dict = "fake-dict"
@@ -292,7 +302,6 @@ class ParameterEntryWindow(QMainWindow):
         cur_index = self.ui.qcomponent_param_tree_view.currentIndex()
         self.model.delete_node(cur_index)
 
-    @QComponentParameterEntryExceptionDecorators.entry_exception_pop_up_warning
     def generate_model_data(self):
         """
         Use QComponent's default_options and parameter (with typing) to populate Param Entry Window
@@ -408,13 +417,37 @@ def create_parameter_entry_window(gui: 'MetalGUI',
         gui.logger.error("Unable to get class from abs file: ", abs_file_path)
         return None
 
+    # check for valid class
+    if not issubclass(cur_class, QComponent):
+        cur_class.error_pop_up = QMessageBox()
+
+        error_message = f"The class {cur_class} is not a valid subclass of QComponent"
+
+        # modality set by critical, Don't set Title -- will NOT show
+        # up on MacOs¥
+        cur_class.error_pop_up.critical(gui.main_window, "", error_message)
+        return None
+
     if not parent:
         parent = gui.main_window  # gui.component_window.ui.tabHelp
 
     param_window = ParameterEntryWindow(cur_class, gui.design, parent, gui)
 
     param_window.dock = dockify(param_window, "New " + cur_class.__name__, gui)
-    param_window.setup_pew()
+
+    try:
+        param_window.setup_pew()
+    except Exception as e:
+        param_window.dock.deleteLater()
+
+        cur_class.error_pop_up = QMessageBox()
+
+        error_message = f"Error while trying to instantiate object: {e}"
+
+        # modality set by critical, Don't set Title -- will NOT show
+        # up on MacOs¥
+        cur_class.error_pop_up.critical(gui.main_window, "", error_message)
+        return None
 
     param_window.dock.show()
     param_window.dock.raise_()

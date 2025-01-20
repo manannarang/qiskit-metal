@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file './main_window_ui.ui',
 # licensing of './main_window_ui.ui' applies.
 #
-# Created: Sat Jun 19 22:02:30 2021
+# Created: Thu Jun 30 16:30:19 2022
 #      by: pyside2-uic  running on PySide2 5.13.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -15,7 +15,7 @@ class Ui_MainWindow(object):
 
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1300, 848)
+        MainWindow.resize(1310, 847)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/metal_logo"), QtGui.QIcon.Normal,
                        QtGui.QIcon.Off)
@@ -48,20 +48,27 @@ class Ui_MainWindow(object):
         icon1.addPixmap(QtGui.QPixmap(":/main_view"), QtGui.QIcon.Normal,
                         QtGui.QIcon.On)
         self.tabWidget.addTab(self.mainViewTab, icon1, "")
-        self.tabElements = QtWidgets.QWidget()
-        self.tabElements.setObjectName("tabElements")
-        self.verticalLayout_10 = QtWidgets.QVBoxLayout(self.tabElements)
+        self.tabQGeometry = QtWidgets.QWidget()
+        self.tabQGeometry.setObjectName("tabQGeometry")
+        self.verticalLayout_10 = QtWidgets.QVBoxLayout(self.tabQGeometry)
         self.verticalLayout_10.setSpacing(0)
         self.verticalLayout_10.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout_10.setObjectName("verticalLayout_10")
         icon2 = QtGui.QIcon()
         icon2.addPixmap(QtGui.QPixmap(":/elements"), QtGui.QIcon.Normal,
                         QtGui.QIcon.Off)
-        self.tabWidget.addTab(self.tabElements, icon2, "")
+        self.tabWidget.addTab(self.tabQGeometry, icon2, "")
+        self.tabNetList = QtWidgets.QWidget()
+        self.tabNetList.setObjectName("tabNetList")
+        self.verticalLayout_22 = QtWidgets.QVBoxLayout(self.tabNetList)
+        self.verticalLayout_22.setSpacing(0)
+        self.verticalLayout_22.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayout_22.setObjectName("verticalLayout_22")
+        self.tabWidget.addTab(self.tabNetList, icon2, "")
         self.verticalLayout.addWidget(self.tabWidget)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar()
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1300, 24))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1310, 24))
         self.menubar.setBaseSize(QtCore.QSize(0, 0))
         self.menubar.setObjectName("menubar")
         self.menuDesign = QtWidgets.QMenu(self.menubar)
@@ -461,6 +468,12 @@ class Ui_MainWindow(object):
                          QtGui.QIcon.Normal, QtGui.QIcon.On)
         self.actionDeveloperMode.setIcon(icon29)
         self.actionDeveloperMode.setObjectName("actionDeveloperMode")
+        self.actionWebHelp = QtWidgets.QAction(MainWindow)
+        icon30 = QtGui.QIcon()
+        icon30.addPixmap(QtGui.QPixmap(":/browser"), QtGui.QIcon.Normal,
+                         QtGui.QIcon.Off)
+        self.actionWebHelp.setIcon(icon30)
+        self.actionWebHelp.setObjectName("actionWebHelp")
         self.menuDesign.addSeparator()
         self.menuDesign.addAction(self.actionLabelDesign)
         self.menuDesign.addAction(self.actionLoad)
@@ -506,6 +519,8 @@ class Ui_MainWindow(object):
         self.toolBarDesign.addAction(self.actionRebuild)
         self.toolBarDesign.addAction(self.actionBuildHistory)
         self.toolBarDesign.addSeparator()
+        self.toolBarDesign.addAction(self.actionWebHelp)
+        self.toolBarDesign.addSeparator()
         self.toolBarView.addAction(self.actionToggleDocks)
         self.toolBarView.addAction(self.actionScreenshot)
         self.toolbar_renderers.addAction(self.actionGDS)
@@ -513,7 +528,7 @@ class Ui_MainWindow(object):
         self.toolbar_renderers.addAction(self.actionQ3D)
 
         self.retranslateUi(MainWindow)
-        self.tabWidget.setCurrentIndex(1)
+        self.tabWidget.setCurrentIndex(2)
         QtCore.QObject.connect(self.actionElements,
                                QtCore.SIGNAL("toggled(bool)"),
                                MainWindow._set_element_tab)
@@ -608,6 +623,8 @@ class Ui_MainWindow(object):
                                MainWindow.show_renderer_hfss)
         QtCore.QObject.connect(self.actionQ3D, QtCore.SIGNAL("triggered()"),
                                MainWindow.show_renderer_q3d)
+        QtCore.QObject.connect(self.actionWebHelp, QtCore.SIGNAL("triggered()"),
+                               MainWindow.open_web_help)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -632,14 +649,22 @@ class Ui_MainWindow(object):
             QtWidgets.QApplication.translate("MainWindow", "Main View", None,
                                              -1))
         self.tabWidget.setTabText(
-            self.tabWidget.indexOf(self.tabElements),
-            QtWidgets.QApplication.translate("MainWindow", "Elements", None,
+            self.tabWidget.indexOf(self.tabQGeometry),
+            QtWidgets.QApplication.translate("MainWindow", "QGeometry", None,
                                              -1))
         self.tabWidget.setTabToolTip(
-            self.tabWidget.indexOf(self.tabElements),
+            self.tabWidget.indexOf(self.tabQGeometry),
             QtWidgets.QApplication.translate(
-                "MainWindow", "Shoe the tables of elements of the the design",
-                None, -1))
+                "MainWindow", "Show the QGeometry elements of the design", None,
+                -1))
+        self.tabWidget.setTabText(
+            self.tabWidget.indexOf(self.tabNetList),
+            QtWidgets.QApplication.translate("MainWindow", "Net List", None,
+                                             -1))
+        self.tabWidget.setTabToolTip(
+            self.tabWidget.indexOf(self.tabNetList),
+            QtWidgets.QApplication.translate("MainWindow", "Show the Net List",
+                                             None, -1))
         self.menuDesign.setToolTip(
             QtWidgets.QApplication.translate("MainWindow", "Design Menu", None,
                                              -1))
@@ -1008,9 +1033,15 @@ class Ui_MainWindow(object):
                                              None, -1))
         self.actionDeveloperMode.setToolTip(
             QtWidgets.QApplication.translate("MainWindow", "clickme", None, -1))
+        self.actionWebHelp.setText(
+            QtWidgets.QApplication.translate("MainWindow", "Web Help", None,
+                                             -1))
+        self.actionWebHelp.setToolTip(
+            QtWidgets.QApplication.translate("MainWindow", "Open Web Help",
+                                             None, -1))
 
 
-from .widgets.qlibrary_display.tree_view_qlibrary import TreeViewQLibrary
-from .widgets.log_widget.log_metal import QTextEditLogger
 from .widgets.all_components.table_view_all_components import QTableView_AllComponents
+from .widgets.log_widget.log_metal import QTextEditLogger
+from .widgets.qlibrary_display.tree_view_qlibrary import TreeViewQLibrary
 from . import main_window_rc_rc

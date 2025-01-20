@@ -4,9 +4,9 @@ Qiskit Metal | Quantum Device Design & Analysis (Q-EDA) |version|
 
 .. attention::
 
-    This is an alpha version of Qiskit Metal, the code is still under development. 
-    Please let us know about anything you might want us to add or elaborate upon in the 
-    Slack channel `#metal <https://qiskit.slack.com/archives/C01R8KP5WP7>`_ in the `qiskit workspace <https://ibm.co/joinqiskitslack>`_.
+    This is an alpha version of Qiskit Metal, the code is still under development.
+    Please let us know about anything you might want us to add or elaborate upon in the
+    Slack channel `#metal <https://qiskit.slack.com/archives/C01R8KP5WP7>`_ in the `qiskit workspace <https://qisk.it/join-slack>`_.
 
 .. hint::
     You can open this documentation using
@@ -22,7 +22,7 @@ Qiskit Metal | Quantum Device Design & Analysis (Q-EDA) |version|
 .. rubric:: **About**
 
 **Qiskit Metal | for quantum device design & analysis (`Qiskit Metal`)**
-is an open-source framework (and library) for the design of superconducting quantum 
+is an open-source framework (and library) for the design of superconducting quantum
 chips and devices.
 Call it quantum EDA (Q-EDA) and analysis. Qiskit Metal is:
 
@@ -34,16 +34,20 @@ Call it quantum EDA (Q-EDA) and analysis. Qiskit Metal is:
 * Community-oriented and tutorial-driven, join the `#metal <https://qiskit.slack.com/archives/C01R8KP5WP7>`_ Slack.
 
 
-Use the slack channel.  Join `qiskit slack <https://ibm.co/joinqiskitslack>`_ and 
-then join the `#metal <https://qiskit.slack.com/archives/C01R8KP5WP7>`_ channel to communicate with the developers and other participants.  
+Use the slack channel.  Join `qiskit slack <https://qisk.it/join-slack>`_ and
+then join the `#metal <https://qiskit.slack.com/archives/C01R8KP5WP7>`_ channel to communicate with the developers and other participants.
 You may also use this channel to learn about upcoming weekly tutorials and to inquire about potential collaborations.
+
+
+.. rubric:: **Live tutorials and Q&A**:
+We host live tutorials and Q&A sessions.  Announcements for future tutorials are posted in the #metal channel.
 
 .. rubric:: **Qiskit Metal Vision**:
 
-Designing quantum devices is the bedrock of the quantum ecosystem, 
+Designing quantum devices is the bedrock of the quantum ecosystem,
 but it is a difficult, multi-step process that connects traditionally disparate worlds.
-Metal is automating and streamlining this process. 
-Our vision is to develop a community-driven universal platform capable 
+Metal is automating and streamlining this process.
+Our vision is to develop a community-driven universal platform capable
 of orchestrating quantum chip development from concept to fabrication in
 a simple and open framework.
 
@@ -72,7 +76,7 @@ The goal of Qiskit Metal is to allow for easy quantum hardware modeling with red
     :maxdepth: 2
     :hidden:
 
-    Home<https://qiskit.org/documentation/metal/>
+    Home<self>
     Installing Qiskit Metal<installation>
     Frequently Asked Questions<faq>
     Metal Workflow<workflow>

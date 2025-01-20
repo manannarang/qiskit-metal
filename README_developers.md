@@ -40,7 +40,7 @@ conda env create -n <env_name> environment.yml
 conda activate <env_name>
 python -m pip install --no-deps -e .
 ```
-Note the use of `--no-deps`. Indeed the `environment.yml` already instructs conda to install all the necessary package dependencies. We therefore prevent `setup.py` from overwriting them with the pip-equivalent packages, which might not be compatible with conda. 
+Note the use of `--no-deps`. Indeed the `environment.yml` already instructs conda to install all the necessary package dependencies. We therefore prevent `setup.py` from overwriting them with the pip-equivalent packages, which might not be compatible with conda.
 
 This creates a new environment with name `<env_name>` with all the necessary library dependencies.
 Then it activates the new environment.
@@ -71,7 +71,7 @@ Similarly, `jupyter lab` will in general execute python code from the `base` env
 
 In the two above cases, you will need to setup a jupyter kernel that points to your `<env_name>` environment, to be able to find and execute successfully the qiskit-metal package.
 
-Check for the instructions to install a new kernel in the [FAQ](https://qiskit.org/documentation/metal/faq.html).
+Check for the instructions to install a new kernel in the [FAQ](https://qiskit-community.github.io/qiskit-metal/faq.html).
 
 #### Subsequent updates of the conda environment
 
@@ -80,12 +80,12 @@ For example, we can anticipate updating `pyEPR-quantum` to enable Ansys interact
 To update your local install, simply execute the metal package install command
 ```sh
 conda env update -n <env_name_exist> environment.yml
-``` 
+```
 Alternatively, you can remove your conda environment by executing the commands below and later re-create a new environment following the original install instructions in section 1.
 ```sh
 conda env list
 conda env remove -n <env_name_exist>
-``` 
+```
 Notice that using the `conda env update` command might introduce inconsistencies in your virtual environment, and render it unusable. This occurs in general when using conda install commands after any number of pip install commands.
 
 ### Setup without conda: in a virtual environment (alternative setup)
@@ -115,15 +115,44 @@ Here are some things to consider when setting up a development environment:
 * Library errors when activating conda environments, or initializing jupyter notebook/lab, might indicate a conflict between python libraries in the base and sub environments. Go ahead and manually delete the library from the base environment `site-packages` folder, shown in the error message. You might need to reinstall them in the sub environment, or create a new one.
 * If Jupyter notebook has trouble finding a dll for a package that works in the new environment outside of Jupyter, then try opening Jupyter notebook from the new environment instead of from `base`
 
-### Other Common Issues
+### Installing other dependencies for Open-source Renderers (Gmsh and ElmerFEM)
 
-For other common installation issues, please refer to the [FAQ](https://qiskit.org/documentation/metal/faq.html)
+If you want to use the recently added open-source renderers for [Gmsh](./qiskit_metal/renderers/renderer_gmsh) and [ElmerFEM](./qiskit_metal/renderers/renderer_elmer) for simulation of your design, please make sure that both of them have been installed successfully in your system before running Qiskit Metal. On Windows, Linux, and MacOS (with x86_64 architecture CPUs), Gmsh will be installed automatically using the `environment.yml` file during the conda installation step above. For more detailed steps to install ElmerFEM, please refer to [this](./README_Gmsh_Elmer.md) document.
 
-### Additional steps for developers
+**NOTE:** We would like to give a disclaimer for users on Apple silicon Macs (M1 and M2-series). Currently, Qiskit Metal uses PySide2 which is not natively supported on the ARM architecture. This will lead to error in instantiating the `MetalGUI` as of now. However, if you still want to use Qiskit Metal without the GUI, the process for installing Gmsh software is a bit different and can be found in [this](./README_Gmsh_Elmer.md) document.
+
+# Other Common Issues
+
+For other common installation issues, please refer to the [FAQ](https://qiskit-community.github.io/qiskit-metal/faq.html)
+
+## Additional steps for developers
 
 If you are planning to develop the qiskit metal codebase, you need extra packages, which you can install by running the following command instead of (or after) the previous one:
 ```
 python -m pip install -r requirements-dev.txt
 ```
-You'll want to also use these instructions to [setup user environment](/docs/NEW_DEVELOPER_SETUP.md)
+You may also want to also use these instructions to [setup user environment](/docs/NEW_DEVELOPER_SETUP.md)
 
+## Setting up precommit hooks
+
+If are planning on committing, you can run the following in the root of your project to link the available precommit hooks.
+```
+./hook_setup
+```
+Please make sure the command is run from the same shell you plan on using to commit. If running on Windows, please make sure that this script is run from git-bash or another Linux-style shell. Currently, the precommit hook will check for yapf formatting.
+
+## Get more information when you commit code and CI gives linting error(s)
+
+If are planning on committing, code and get a linting error. Sometimes the log does not have enough details to fix the error.
+```
+yapf --diff --recursive --style .style.yapf qiskit_metal
+```
+Go to directory with qiskit-metal/.style.yapf  file and run the above command to lint locally. This may give more meaningful feedback for linting failure.
+
+## Uninstall precommit hook
+
+```
+rm /hooks/pre-commit
+```
+
+If you need to uninstall the precommit hook, go to the root of the project and run the above command.

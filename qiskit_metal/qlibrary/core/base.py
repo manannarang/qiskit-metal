@@ -32,6 +32,7 @@ from inspect import signature
 from qiskit_metal import draw
 from qiskit_metal import is_design, logger
 
+import qiskit_metal.qlibrary as qlibrary
 from qiskit_metal import config
 from qiskit_metal.draw import BaseGeometry
 from qiskit_metal.toolbox_python.attr_dict import Dict
@@ -72,6 +73,12 @@ class QComponent():
         * The class provides the interfaces for the component (creator user)
 
     Default Options:
+        * pos_x/_y: '0.0um' -- The x/y position of the center of the QComponent.
+        * orientation: '0.0' -- The primary direction in degrees of the QComponent.
+          Expressed counter-clockwise orientation.
+        * chip: 'main' -- Chip holding the QComponent.
+        * layer: '1' -- Manufacturing layer used for the QComponent.
+
         Nested default options can be overwritten with the update function.
         The following code demonstrates how the update works.
 
@@ -109,12 +116,11 @@ class QComponent():
     """
     # pylint: disable=too-many-instance-attributes
 
-    default_options = Dict(
-        # Note: If something is added here, _gather_all_children_options(cls) needs to be changed.
-        # Intended for future use, for components that do not normally take pins as inputs
-        # to be able to have an input pin and be moved/rotated based on said input.
-        # pin_inputs = Dict()
-    )
+    default_options = Dict(pos_x='0.0um',
+                           pos_y='0.0um',
+                           orientation='0.0',
+                           chip='main',
+                           layer='1')
     """Default drawing options"""
 
     component_metadata = Dict()
@@ -190,7 +196,7 @@ class QComponent():
 
         self._design = design  # reference to parent
         # pylint: disable=literal-comparison
-        if self._delete_evaluation(name) is 'NameInUse':
+        if self._delete_evaluation(name) == 'NameInUse':
             raise ValueError(
                 f"{name} already exists! Please choose a different name for your new QComponent"
             )
@@ -243,8 +249,8 @@ class QComponent():
                 short_name = prefix['short_name'][:name_trunc]
             name_id = self.design._get_new_qcomponent_name_id(short_name)
             # rename loop to make sure that no components manually named by the user conflicts
-            while self.design.rename_component(
-                    self._id, short_name + "_" + str(name_id)) != 1:
+            while self.design.rename_component(self._id, short_name + "_" +
+                                               str(name_id)) != 1:
                 name_id = self.design._get_new_qcomponent_name_id(short_name)
 
         # Add keys for each type of table.  add_qgeometry() will update bool if the table is used.
@@ -258,7 +264,7 @@ class QComponent():
     @classmethod
     def _gather_all_children_options(cls) -> dict:
         """From the QComponent core class, traverse the child classes to
-        gather the .default options for each child class.
+        gather the `default_options` for each child class.
 
         Collects the options starting with the basecomponent,
         and stepping through the children.
@@ -277,7 +283,7 @@ class QComponent():
         options_from_children = {}
         parents = inspect.getmro(cls)
 
-        # len-2: base.py is not expected to have default_options dict to add to design class.
+        # len-2: generic "object" does not have default_options.
         for child in parents[len(parents) - 2::-1]:
             # The template default options are in a class dict attribute `default_options`.
             if hasattr(child, 'default_options'):
@@ -285,6 +291,11 @@ class QComponent():
                     **options_from_children,
                     **child.default_options
                 }
+
+        if qlibrary.core.qroute.QRoute in parents:
+            options_from_children.pop("pos_x", None)
+            options_from_children.pop("pos_y", None)
+            options_from_children.pop("orientation", None)
 
         return options_from_children
 
@@ -462,7 +473,6 @@ class QComponent():
         if template_key not in design.template_options:
             cls._register_class_with_design(design, template_key,
                                             renderer_and_component_template)
-            # design, template_key, component_template)
 
         if template_key not in design.template_options:
             logger_ = logger_ or design.logger
@@ -523,7 +533,7 @@ class QComponent():
 
     def to_script(self,
                   thin: bool = False,
-                  is_part_of_chip: bool = False) -> (str, str):
+                  is_part_of_chip: bool = False) -> Tuple:
         """
 
         Args:
@@ -625,7 +635,7 @@ gui = MetalGUI(design)
         str_failed = ""
         if len(failed) > 0:
             str_failed += """
-                       
+
             # WARNING"""
         for k in failed:
             str_failed += f"""
@@ -660,7 +670,7 @@ gui = MetalGUI(design)
         body = f"""
 {str_failed}
 {strname} = {obj_name}(
-design, 
+design,
 name='{strname}'{other_args}
 )
 {str_meta_d}
@@ -758,7 +768,7 @@ name='{strname}'{other_args}
                 Returns the number as is. Int to int, etc.
 
 
-        Arithemetic:
+        Arithmetic:
             Some basic arithmetic can be handled as well, such as `'-2 * 1e5 nm'`
             will yield float(-0.2) when the default units are set to `mm`.
 
@@ -820,7 +830,7 @@ name='{strname}'{other_args}
             points: np.ndarray,
             width: float,
             input_as_norm: bool = False,
-            chip: str = 'main',
+            chip: str = None,
             gap: float = None):  # gap defaults to 0.6 * width
         """Adds a pin from two points which are normal/tangent to the intended
         plane of the pin. The normal should 'point' in the direction of
@@ -834,7 +844,8 @@ name='{strname}'{other_args}
             * input_as_norm (bool): Indicates if the points are tangent or normal to the pin plane.
               Defaults to False.. Make True for normal.
             * parent (Union[int,]): The id of the parent component.
-            * chip (str): the name of the chip the pin is located on.  Defaults to 'main'.
+            * chip (str): the name of the chip the pin is located on. Defaults to None, which is 
+            converted to self.options.chip.
             * gap (float): the dielectric gap of the pin for the purpose of representing as a port
               for simulations.  Defaults to None which is converted to 0.6 * width.
 
@@ -884,6 +895,8 @@ name='{strname}'{other_args}
 
         if gap is None:
             gap = width * 0.6
+        if chip is None:
+            chip = self.options.chip
 
         rounding_val = self.design.template_options['PRECISION']
         points = np.around(
@@ -1063,8 +1076,8 @@ name='{strname}'{other_args}
             geometry: dict,
             subtract: bool = False,
             helper: bool = False,
-            layer: Union[int, str] = 1,  # chip will be here
-            chip: str = 'main',
+            layer: Union[int, str] = None,  # chip will be here
+            chip: str = None,
             **kwargs):
         r"""Add QGeometry.
 
@@ -1081,8 +1094,9 @@ name='{strname}'{other_args}
             helper (bool): Is this a helper object. If true, subtract must be false
                            Defaults to False.
             layer (int, str): The layer to which the set of QGeometry will belong
-                              Defaults to 1.
-            chip (str): Chip name.  Defaults to 'main'.
+                              Defaults to None, which is converted to self.options.chip.
+            chip (str): Chip name. Defaults to None, which is converted to 
+            self.options.chip.
             kwargs (dict): Parameters dictionary
 
         Assumptions:
@@ -1091,6 +1105,11 @@ name='{strname}'{other_args}
         """
         # assert (subtract and helper) == False, "The object can't be a subtracted helper. Please"\
         #    " choose it to either be a helper or a a subtracted layer, but not both. Thank you."
+
+        if layer is None:
+            layer = self.options.layer
+        if chip is None:
+            chip = self.options.chip
 
         if kind in self.qgeometry_table_usage.keys():
             self.qgeometry_table_usage[kind] = True

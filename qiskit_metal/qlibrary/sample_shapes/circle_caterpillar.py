@@ -27,40 +27,35 @@ class CircleCaterpillar(QComponent):
     .. image::
         CircleCaterpillar.png
 
+    .. meta::
+        Circle Caterpillar
+
     Default Options:
         * segments: '5'
         * distance: '1.2'
         * radius: '300um'
-        * pos_x: '0um'
-        * pos_y: '0um'
         * resolution: '16'
         * cap_style: 'round' -- Valid options are 'round', 'flat', 'square'
         * subtract: 'False'
         * helper: 'False'
-        * chip: 'main'
-        * layer: '1'
     """
 
     default_options = dict(
         segments='5',
         distance='1.2',
         radius='300um',
-        pos_x='0um',
-        pos_y='0um',
         resolution='16',
         cap_style='round',  # round, flat, square
         # join_style = 'round', # round, mitre, bevel
         # General
         subtract='False',
-        helper='False',
-        chip='main',
-        layer='1')
+        helper='False')
     """Default drawing options"""
 
     TOOLTIP = """A single configurable circle"""
 
     def make(self):
-        """The make function implements the logic that creates the geoemtry
+        """The make function implements the logic that creates the geometry
         (poly, path, etc.) from the qcomponent.options dictionary of
         parameters, and the adds them to the design, using
         qcomponent.add_qgeometry(...), adding in extra needed information, such

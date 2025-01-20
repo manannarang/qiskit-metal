@@ -15,7 +15,7 @@
 # pylint: disable=wrong-import-order
 # pylint: disable=wrong-import-position
 """Qiskit Metal"""
-__version__ = '0.0.4'
+__version__ = '0.1.5'
 __license__ = "Apache 2.0"
 __copyright__ = 'Copyright IBM 2019-2020'
 __author__ = 'Zlatko Minev, Thomas McConkey, and them IBM Quantum Team'
@@ -37,7 +37,7 @@ if os.name == 'nt':
             >>>>>> from the list of qiskit-metal package dependencies in Windows. <<<<<<\n \
             >>>>>>>> Before you can use Qiskit Metal, please install geopandas. <<<<<<<<\n \
             >>>> For more information, you can follow the instructions on this FAQ <<<<<\n \
-            >>>>>>>>>>>>> https://qiskit.org/documentation/metal/faq.html <<<<<<<<<<<<<<\n"
+            >>>>>>>>>>>>> https://qiskit-community.github.io/qiskit-metal/faq.html <<<<<<<<<<<<<<\n"
              )
         raise
 
@@ -52,6 +52,9 @@ def __setup_Qt_backend():  # pylint: disable=invalid-name
     to prevent Qt windows from hanging.
     """
     # pylint: disable=import-outside-toplevel
+
+    # When in vscode and in debug-mode, may want to comment
+    # next line out, "os.environ["QT_API"] = "pyside2""
     os.environ["QT_API"] = "pyside2"
 
     from PySide2 import QtCore  #, QtWidgets

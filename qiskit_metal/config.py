@@ -21,6 +21,7 @@ Mostly internal.
 
 from .toolbox_python.attr_dict import Dict
 from ._defaults import DefaultMetalOptions, DefaultOptionsRenderer
+import os
 
 renderers_to_load = Dict(
     hfss=Dict(path_name='qiskit_metal.renderers.renderer_ansys.hfss_renderer',
@@ -29,7 +30,18 @@ renderers_to_load = Dict(
              class_name='QQ3DRenderer'),
     gds=Dict(path_name='qiskit_metal.renderers.renderer_gds.gds_renderer',
              class_name='QGDSRenderer'),
-)
+    gmsh=Dict(path_name='qiskit_metal.renderers.renderer_gmsh.gmsh_renderer',
+              class_name='QGmshRenderer'),
+    elmer=Dict(path_name='qiskit_metal.renderers.renderer_elmer.elmer_renderer',
+               class_name='QElmerRenderer'),
+    aedt_q3d=Dict(
+        path_name=
+        'qiskit_metal.renderers.renderer_ansys_pyaedt.q3d_renderer_aedt',
+        class_name='QQ3DPyaedt'),
+    aedt_hfss=Dict(
+        path_name=
+        'qiskit_metal.renderers.renderer_ansys_pyaedt.hfss_renderer_aedt',
+        class_name='QHFSSPyaedt'))
 """
 Define the renderes to load. Just provide the module names here.
 """
@@ -112,11 +124,7 @@ def is_using_ipython():
     Returns:
         bool -- True if ran in IPython
     """
-    try:
-        __IPYTHON__  # pylint: disable=undefined-variable, pointless-statement
-        return True
-    except NameError:
-        return False
+    return 'JPY_PARENT_PID' in os.environ
 
 
 def is_building_docs():

@@ -27,34 +27,26 @@ class Rectangle(QComponent):
     .. image::
         Rectangle.png
 
+    .. meta::
+        Rectangle
 
     Default Options:
         * width: '500um'
         * height: '300um'
-        * pos_x: '0um'
-        * pos_y: '0um'
-        * rotation: '0'
         * subtract: 'False'
         * helper: 'False'
-        * chip: 'main'
-        * layer: '1'
     """
 
     default_options = Dict(width='500um',
                            height='300um',
-                           pos_x='0um',
-                           pos_y='0um',
-                           rotation='0',
                            subtract='False',
-                           helper='False',
-                           chip='main',
-                           layer='1')
+                           helper='False')
     """Default drawing options"""
 
     TOOLTIP = """A single configurable square"""
 
     def make(self):
-        """The make function implements the logic that creates the geoemtry
+        """The make function implements the logic that creates the geometry
         (poly, path, etc.) from the qcomponent.options dictionary of
         parameters, and the adds them to the design, using
         qcomponent.add_qgeometry(...), adding in extra needed information, such
@@ -63,7 +55,7 @@ class Rectangle(QComponent):
 
         # create the geometry
         rect = draw.rectangle(p.width, p.height, p.pos_x, p.pos_y)
-        rect = draw.rotate(rect, p.rotation)
+        rect = draw.rotate(rect, p.orientation)
         ##############################################
         # add qgeometry
         self.add_qgeometry('poly', {'rectangle': rect},

@@ -40,6 +40,9 @@ class ResonatorCoilRect(QComponent):
     .. image::
         ResonatorCoilRect.png
 
+    .. meta::
+        Resonator Coil Rectangle
+
     Default Options:
         Convention: Values (unless noted) are strings with units included,
         (e.g., '30um')
@@ -50,12 +53,6 @@ class ResonatorCoilRect(QComponent):
         * height: '40um' -- The height of the inner portion of the spiral
         * gap: '4um' -- The distance between each layer of the spiral
         * coupler_distance: '10um' -- The pin position from the grounded termination of the spiral
-        * pos_x: '0um' -- The x position of the ground termination.
-        * pos_y: '0um' -- The y position of the ground termination.
-        * rotation: '0' -- The direction of the termination. 0 degrees is +x, following a
-          counter-clockwise rotation (eg. 90 is +y)
-        * chip: 'main' -- The chip the pin should be on.
-        * layer: '1' -- Layer the pin is on. Does not have any practical impact to the short.
     """
     component_metadata = Dict(short_name='res')
     """Component metadata"""
@@ -65,19 +62,14 @@ class ResonatorCoilRect(QComponent):
                            line_width='1um',
                            height='40um',
                            gap='4um',
-                           coupler_distance='10um',
-                           pos_x='0um',
-                           pos_y='0um',
-                           rotation='0',
-                           chip='main',
-                           layer='1')
+                           coupler_distance='10um')
     """Default drawing options"""
 
     TOOLTIP = """A rectangle spiral resonator based on length input. The X dimension is
     modified by the code based on the total length inputed."""
 
     def make(self):
-        """The make function implements the logic that creates the geoemtry
+        """The make function implements the logic that creates the geometry
         (poly, path, etc.) from the qcomponent.options dictionary of
         parameters, and the adds them to the design, using
         qcomponent.add_qgeometry(...), adding in extra needed information, such
@@ -93,7 +85,7 @@ class ResonatorCoilRect(QComponent):
                                       (2 * n - 1))
 
         if x_n <= p.gap + p.line_width:
-            self._error_message = f'Inputted values results in the width of the spiral being too small.'
+            self._error_message = 'Inputted values results in the width of the spiral being too small.'
             self.logger.warning(self._error_message)
             return
 
@@ -122,7 +114,7 @@ class ResonatorCoilRect(QComponent):
         ])
 
         c_items = [spiral_list, spiral_etch, points]
-        c_items = draw.rotate(c_items, p.rotation, origin=(0, 0))
+        c_items = draw.rotate(c_items, p.orientation, origin=(0, 0))
         c_items = draw.translate(c_items, p.pos_x, p.pos_y)
         [spiral_list, spiral_etch, points] = c_items
         ##############################################
